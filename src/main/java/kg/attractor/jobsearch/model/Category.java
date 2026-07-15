@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModelRespondedApplicant {
+public class Category {
 
     private Long id;
-    private Long resumeId;
-    private Long vacancyId;
-    private Boolean confirmation;
+    private String name;
+    private Long parentId;
 }

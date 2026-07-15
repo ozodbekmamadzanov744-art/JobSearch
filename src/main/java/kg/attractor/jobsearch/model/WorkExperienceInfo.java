@@ -7,10 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModelContactInfo {
+public class WorkExperienceInfo {
 
     private Long id;
-    private Long typeId;
     private Long resumeId;
-    private String value;
+    private Integer years;
+    private String companyName;
+    private String position;
+    private String responsibilities;
 }

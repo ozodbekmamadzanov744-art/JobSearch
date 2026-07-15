@@ -1,6 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
-import kg.attractor.jobsearch.model.ModelUser;
+import kg.attractor.jobsearch.model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     @PostMapping("/registration")
-    public ResponseEntity<ModelUser> registration(@RequestBody ModelUser user) {
+    public ResponseEntity<User> registration(@RequestBody User user) {
         return ResponseEntity.ok(user);
     }
 }

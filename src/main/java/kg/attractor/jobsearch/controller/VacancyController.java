@@ -1,8 +1,8 @@
 package kg.attractor.jobsearch.controller;
 
-import kg.attractor.jobsearch.model.ModelRespondedApplicant;
-import kg.attractor.jobsearch.model.ModelUser;
-import kg.attractor.jobsearch.model.ModelVacancy;
+import kg.attractor.jobsearch.model.RespondedApplicant;
+import kg.attractor.jobsearch.model.User;
+import kg.attractor.jobsearch.model.Vacancy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,13 +13,13 @@ import java.util.List;
 public class VacancyController {
 
     @PostMapping
-    public ResponseEntity<ModelVacancy> createVacancy(@RequestBody ModelVacancy vacancy) {
+    public ResponseEntity<Vacancy> createVacancy(@RequestBody Vacancy vacancy) {
         return ResponseEntity.ok(vacancy);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ModelVacancy> updateVacancy(@PathVariable Long id,
-                                                      @RequestBody ModelVacancy vacancy) {
+    public ResponseEntity<Vacancy> updateVacancy(@PathVariable Long id,
+                                                 @RequestBody Vacancy vacancy) {
         return ResponseEntity.ok(vacancy);
     }
 
@@ -29,23 +29,23 @@ public class VacancyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ModelVacancy>> getAllActiveVacancies() {
+    public ResponseEntity<List<Vacancy>> getAllActiveVacancies() {
         return ResponseEntity.ok(List.of());
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<ModelVacancy>> getVacanciesByCategory(@PathVariable Long categoryId) {
+    public ResponseEntity<List<Vacancy>> getVacanciesByCategory(@PathVariable Long categoryId) {
         return ResponseEntity.ok(List.of());
     }
 
     @PostMapping("/{id}/respond")
-    public ResponseEntity<ModelRespondedApplicant> respondToVacancy(@PathVariable Long id,
-                                                                    @RequestBody ModelRespondedApplicant response) {
+    public ResponseEntity<RespondedApplicant> respondToVacancy(@PathVariable Long id,
+                                                               @RequestBody RespondedApplicant response) {
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}/applicants")
-    public ResponseEntity<List<ModelUser>> getApplicantsForVacancy(@PathVariable Long id) {
+    public ResponseEntity<List<User>> getApplicantsForVacancy(@PathVariable Long id) {
         return ResponseEntity.ok(List.of());
     }
 }
