@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModelContactType {
+public class ContactType {
 
     private Long id;
     private String type;

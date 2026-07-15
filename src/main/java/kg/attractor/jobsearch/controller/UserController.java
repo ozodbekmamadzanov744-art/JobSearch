@@ -1,6 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
-import kg.attractor.jobsearch.model.ModelUser;
+import kg.attractor.jobsearch.model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,8 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
     @GetMapping("/{id}")
-    public ResponseEntity<ModelUser> getUser(@PathVariable Long id) {
-        return ResponseEntity.ok(new ModelUser());
+    public ResponseEntity<User> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok(new User());
     }
 
     @PostMapping("/{id}/avatar")

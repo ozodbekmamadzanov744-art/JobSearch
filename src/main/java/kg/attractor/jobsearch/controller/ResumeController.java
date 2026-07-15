@@ -1,6 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
-import kg.attractor.jobsearch.model.ModelResume;
+import kg.attractor.jobsearch.model.Resume;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,13 +11,13 @@ import java.util.List;
 public class ResumeController {
 
     @PostMapping
-    public ResponseEntity<ModelResume> createResume(@RequestBody ModelResume resume) {
+    public ResponseEntity<Resume> createResume(@RequestBody Resume resume) {
         return ResponseEntity.ok(resume);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ModelResume> updateResume(@PathVariable Long id,
-                                                    @RequestBody ModelResume resume) {
+    public ResponseEntity<Resume> updateResume(@PathVariable Long id,
+                                               @RequestBody Resume resume) {
         return ResponseEntity.ok(resume);
     }
 
@@ -27,12 +27,12 @@ public class ResumeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ModelResume>> getAllResumes() {
+    public ResponseEntity<List<Resume>> getAllResumes() {
         return ResponseEntity.ok(List.of());
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<ModelResume>> getResumesByCategory(@PathVariable Long categoryId) {
+    public ResponseEntity<List<Resume>> getResumesByCategory(@PathVariable Long categoryId) {
         return ResponseEntity.ok(List.of());
     }
 }
