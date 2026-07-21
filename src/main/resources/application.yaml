@@ -1,3 +1,15 @@
 spring:
   application:
     name: JobSearch
+  datasource:
+    url: jdbc:h2:file:./data/jobsearch;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: ozodbek
+    password: 2006
+  sql:
+    init:
+      mode: always
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
