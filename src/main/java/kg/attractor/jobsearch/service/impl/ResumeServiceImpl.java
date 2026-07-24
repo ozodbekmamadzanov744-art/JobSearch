@@ -3,6 +3,7 @@ package kg.attractor.jobsearch.service.impl;
 import kg.attractor.jobsearch.dao.EducationInfoDao;
 import kg.attractor.jobsearch.dao.ResumeDao;
 import kg.attractor.jobsearch.dao.WorkExperienceInfoDao;
+import kg.attractor.jobsearch.exception.ResourceNotFoundException;
 import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
@@ -61,7 +62,7 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public Resume getResumeById(Long id) {
         return resumeDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("Резюме с id " + id + " не найдено"));
+                .orElseThrow(() -> new ResourceNotFoundException("Резюме с id " + id + " не найдено"));
     }
 
     @Override

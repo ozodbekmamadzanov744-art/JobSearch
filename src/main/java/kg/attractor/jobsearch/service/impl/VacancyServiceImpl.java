@@ -4,6 +4,8 @@ import kg.attractor.jobsearch.dao.RespondedApplicantDao;
 import kg.attractor.jobsearch.dao.ResumeDao;
 import kg.attractor.jobsearch.dao.UserDao;
 import kg.attractor.jobsearch.dao.VacancyDao;
+import kg.attractor.jobsearch.exception.DuplicateResponseException;
+import kg.attractor.jobsearch.exception.ResourceNotFoundException;
 import kg.attractor.jobsearch.model.RespondedApplicant;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.User;
@@ -49,7 +51,7 @@ public class VacancyServiceImpl implements VacancyService {
     @Override
     public Vacancy getVacancyById(Long id) {
         return vacancyDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("Вакансия с id " + id + " не найдена"));
+                .orElseThrow(() -> new ResourceNotFoundException("Вакансия с id " + id + " не найдена"));
     }
 
     @Override
@@ -78,7 +80,7 @@ public class VacancyServiceImpl implements VacancyService {
         response.setVacancyId(vacancyId);
 
         if (respondedApplicantDao.existsByResumeIdAndVacancyId(response.getResumeId(), vacancyId)) {
-            throw new IllegalStateException("Соискатель уже откликнулся на эту вакансию этим резюме");
+            throw new DuplicateResponseException("Соискатель уже откликнулся на эту вакансию этим резюме");
         }
 
         return respondedApplicantDao.save(response);

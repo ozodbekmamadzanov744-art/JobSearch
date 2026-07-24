@@ -1,6 +1,7 @@
 package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dao.CategoryDao;
+import kg.attractor.jobsearch.exception.ResourceNotFoundException;
 import kg.attractor.jobsearch.model.Category;
 import kg.attractor.jobsearch.service.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category getCategoryById(Long id) {
         return categoryDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("Категория с id " + id + " не найдена"));
+                .orElseThrow(() -> new ResourceNotFoundException("Категория с id " + id + " не найдена"));
     }
 }
