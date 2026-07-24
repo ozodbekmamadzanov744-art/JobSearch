@@ -1,14 +1,16 @@
 package kg.attractor.jobsearch.service;
 
+import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
+import kg.attractor.jobsearch.model.WorkExperienceInfo;
 
 import java.util.List;
 
 public interface ResumeService {
 
-    Resume createResume(Resume resume);
+    Resume createResume(Resume resume, List<EducationInfo> educationList, List<WorkExperienceInfo> workExperienceList);
 
-    Resume updateResume(Long id, Resume resume);
+    Resume updateResume(Long id, Resume resume, List<EducationInfo> educationList, List<WorkExperienceInfo> workExperienceList);
 
     void deleteResume(Long id);
 
@@ -19,4 +21,8 @@ public interface ResumeService {
     List<Resume> getResumesByCategory(Long categoryId);
 
     List<Resume> getResumesByApplicant(Long applicantId);
+
+    List<EducationInfo> getEducationByResumeId(Long resumeId);
+
+    List<WorkExperienceInfo> getWorkExperienceByResumeId(Long resumeId);
 }
