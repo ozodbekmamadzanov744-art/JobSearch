@@ -96,4 +96,18 @@ public class VacancyServiceImpl implements VacancyService {
                 .map(java.util.Optional::get)
                 .toList();
     }
+
+    @Override
+    public List<Vacancy> getVacanciesByApplicant(Long applicantId) {
+        List<Resume> resumes = resumeDao.findByApplicantId(applicantId);
+
+        return resumes.stream()
+                .flatMap(resume -> respondedApplicantDao.findByResumeId(resume.getId()).stream())
+                .map(RespondedApplicant::getVacancyId)
+                .distinct()
+                .map(vacancyDao::findById)
+                .filter(java.util.Optional::isPresent)
+                .map(java.util.Optional::get)
+                .toList();
+    }
 }

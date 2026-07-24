@@ -18,4 +18,6 @@ public interface UserService {
     User findByEmail(String email);
 
     void uploadAvatar(Long id, MultipartFile file);
+
+    boolean existsByEmail(String email);
 }
