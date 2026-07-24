@@ -1,7 +1,9 @@
 package kg.attractor.jobsearch.controller;
 
+import kg.attractor.jobsearch.dto.UserProfileUpdateDto;
 import kg.attractor.jobsearch.dto.UserResponseDto;
 import kg.attractor.jobsearch.mapper.UserMapper;
+import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,13 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUser(@PathVariable Long id) {
         return ResponseEntity.ok(UserMapper.toDto(userService.getUserById(id)));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDto> updateProfile(@PathVariable Long id,
+                                                         @RequestBody UserProfileUpdateDto dto) {
+        User updates = UserMapper.toModel(dto);
+        return ResponseEntity.ok(UserMapper.toDto(userService.updateProfile(id, updates)));
     }
 
     @GetMapping("/search/name")

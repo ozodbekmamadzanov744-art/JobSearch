@@ -1,0 +1,397 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 001-create-categories
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: categories
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: parent_id
+                  type: BIGINT
+        - addForeignKeyConstraint:
+            baseTableName: categories
+            baseColumnNames: parent_id
+            referencedTableName: categories
+            referencedColumnNames: id
+            constraintName: fk_categories_parent
+
+  - changeSet:
+      id: 002-create-users
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: surname
+                  type: VARCHAR(255)
+              - column:
+                  name: age
+                  type: INT
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone_number
+                  type: VARCHAR(55)
+              - column:
+                  name: avatar
+                  type: VARCHAR(500)
+              - column:
+                  name: account_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 003-create-contact-types
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: contact_types
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: type
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 004-create-resumes
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: resumes
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: applicant_id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: category_id
+                  type: BIGINT
+              - column:
+                  name: salary
+                  type: DOUBLE
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+              - column:
+                  name: created_date
+                  type: TIMESTAMP
+              - column:
+                  name: update_time
+                  type: TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: resumes
+            baseColumnNames: applicant_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_resumes_applicant
+        - addForeignKeyConstraint:
+            baseTableName: resumes
+            baseColumnNames: category_id
+            referencedTableName: categories
+            referencedColumnNames: id
+            constraintName: fk_resumes_category
+
+  - changeSet:
+      id: 005-create-contacts-info
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: contacts_info
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: type_id
+                  type: BIGINT
+              - column:
+                  name: resume_id
+                  type: BIGINT
+              - column:
+                  name: contact_value
+                  type: VARCHAR(255)
+        - addForeignKeyConstraint:
+            baseTableName: contacts_info
+            baseColumnNames: type_id
+            referencedTableName: contact_types
+            referencedColumnNames: id
+            constraintName: fk_contacts_info_type
+        - addForeignKeyConstraint:
+            baseTableName: contacts_info
+            baseColumnNames: resume_id
+            referencedTableName: resumes
+            referencedColumnNames: id
+            constraintName: fk_contacts_info_resume
+
+  - changeSet:
+      id: 006-create-vacancies
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: vacancies
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: category_id
+                  type: BIGINT
+              - column:
+                  name: salary
+                  type: DOUBLE
+              - column:
+                  name: exp_from
+                  type: INT
+              - column:
+                  name: exp_to
+                  type: INT
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+              - column:
+                  name: author_id
+                  type: BIGINT
+              - column:
+                  name: created_date
+                  type: TIMESTAMP
+              - column:
+                  name: update_time
+                  type: TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: vacancies
+            baseColumnNames: category_id
+            referencedTableName: categories
+            referencedColumnNames: id
+            constraintName: fk_vacancies_category
+        - addForeignKeyConstraint:
+            baseTableName: vacancies
+            baseColumnNames: author_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_vacancies_author
+
+  - changeSet:
+      id: 007-create-education-info
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: education_info
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: resume_id
+                  type: BIGINT
+              - column:
+                  name: institution
+                  type: VARCHAR(255)
+              - column:
+                  name: program
+                  type: VARCHAR(255)
+              - column:
+                  name: start_date
+                  type: DATE
+              - column:
+                  name: end_date
+                  type: DATE
+              - column:
+                  name: degree
+                  type: VARCHAR(255)
+        - addForeignKeyConstraint:
+            baseTableName: education_info
+            baseColumnNames: resume_id
+            referencedTableName: resumes
+            referencedColumnNames: id
+            constraintName: fk_education_info_resume
+
+  - changeSet:
+      id: 008-create-work-experience-info
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: work_experience_info
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: resume_id
+                  type: BIGINT
+              - column:
+                  name: years
+                  type: INT
+              - column:
+                  name: company_name
+                  type: VARCHAR(255)
+              - column:
+                  name: position
+                  type: VARCHAR(255)
+              - column:
+                  name: responsibilities
+                  type: TEXT
+        - addForeignKeyConstraint:
+            baseTableName: work_experience_info
+            baseColumnNames: resume_id
+            referencedTableName: resumes
+            referencedColumnNames: id
+            constraintName: fk_work_experience_info_resume
+
+  - changeSet:
+      id: 009-create-responded-applicants
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: responded_applicants
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: resume_id
+                  type: BIGINT
+              - column:
+                  name: vacancy_id
+                  type: BIGINT
+              - column:
+                  name: confirmation
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+        - addForeignKeyConstraint:
+            baseTableName: responded_applicants
+            baseColumnNames: resume_id
+            referencedTableName: resumes
+            referencedColumnNames: id
+            constraintName: fk_responded_applicants_resume
+        - addForeignKeyConstraint:
+            baseTableName: responded_applicants
+            baseColumnNames: vacancy_id
+            referencedTableName: vacancies
+            referencedColumnNames: id
+            constraintName: fk_responded_applicants_vacancy
+
+  - changeSet:
+      id: 010-create-messages
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: messages
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: responded_applicants_id
+                  type: BIGINT
+              - column:
+                  name: content
+                  type: TEXT
+              - column:
+                  name: timestamp
+                  type: TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: messages
+            baseColumnNames: responded_applicants_id
+            referencedTableName: responded_applicants
+            referencedColumnNames: id
+            constraintName: fk_messages_responded_applicants
+
+  - changeSet:
+      id: 011-insert-test-data
+      author: Ozodbek Mamadjanov
+      changes:
+        - sqlFile:
+            path: data.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true

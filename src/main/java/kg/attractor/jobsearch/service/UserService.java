@@ -20,4 +20,8 @@ public interface UserService {
     void uploadAvatar(Long id, MultipartFile file);
 
     boolean existsByEmail(String email);
+
+    User updateProfile(Long id, User updates);
+
+
 }

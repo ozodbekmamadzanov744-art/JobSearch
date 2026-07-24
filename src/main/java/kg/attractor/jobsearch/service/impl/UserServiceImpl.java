@@ -100,4 +100,16 @@ public class UserServiceImpl implements UserService {
     public boolean existsByEmail(String email) {
         return userDao.existsByEmail(email);
     }
+
+
+    @Override
+    public User updateProfile(Long id, User updates) {
+        User existing = getUserById(id);
+        existing.setName(updates.getName());
+        existing.setSurname(updates.getSurname());
+        existing.setAge(updates.getAge());
+        existing.setPhoneNumber(updates.getPhoneNumber());
+        userDao.update(existing);
+        return existing;
+    }
 }
