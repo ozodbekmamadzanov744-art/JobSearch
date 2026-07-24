@@ -7,11 +7,12 @@ spring:
     username: ozodbek
     password: 2006
   liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.yaml
+    change-log: classpath:db/changelog/changelog-master.yaml
   h2:
     console:
       enabled: true
       path: /h2-console
 
 server:
-   port: 8090
+  port: 8090
+
