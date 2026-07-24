@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User register(User user) {
-        if (userDao.existsByEmail(user.getEmail())) {
+        if (existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("Пользователь с email " + user.getEmail() + " уже зарегистрирован");
         }
 
@@ -94,5 +94,10 @@ public class UserServiceImpl implements UserService {
             return "";
         }
         return originalFilename.substring(originalFilename.lastIndexOf('.'));
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return userDao.existsByEmail(email);
     }
 }

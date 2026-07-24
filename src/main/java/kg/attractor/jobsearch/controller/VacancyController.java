@@ -1,10 +1,10 @@
 package kg.attractor.jobsearch.controller;
 
-import kg.attractor.jobsearch.model.RespondedApplicant;
-import kg.attractor.jobsearch.model.User;
+import kg.attractor.jobsearch.dto.VacancyRequestDto;
+import kg.attractor.jobsearch.dto.VacancyResponseDto;
+import kg.attractor.jobsearch.mapper.VacancyMapper;
 import kg.attractor.jobsearch.model.Vacancy;
 import kg.attractor.jobsearch.service.VacancyService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,20 +12,25 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/vacancies")
-@RequiredArgsConstructor
 public class VacancyController {
 
     private final VacancyService vacancyService;
 
+    public VacancyController(VacancyService vacancyService) {
+        this.vacancyService = vacancyService;
+    }
+
     @PostMapping
-    public ResponseEntity<Vacancy> createVacancy(@RequestBody Vacancy vacancy) {
-        return ResponseEntity.ok(vacancyService.createVacancy(vacancy));
+    public ResponseEntity<VacancyResponseDto> createVacancy(@RequestBody VacancyRequestDto dto) {
+        Vacancy vacancy = VacancyMapper.toModel(dto);
+        return ResponseEntity.ok(VacancyMapper.toDto(vacancyService.createVacancy(vacancy)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Vacancy> updateVacancy(@PathVariable Long id,
-                                                 @RequestBody Vacancy vacancy) {
-        return ResponseEntity.ok(vacancyService.updateVacancy(id, vacancy));
+    public ResponseEntity<VacancyResponseDto> updateVacancy(@PathVariable Long id,
+                                                            @RequestBody VacancyRequestDto dto) {
+        Vacancy vacancy = VacancyMapper.toModel(dto);
+        return ResponseEntity.ok(VacancyMapper.toDto(vacancyService.updateVacancy(id, vacancy)));
     }
 
     @DeleteMapping("/{id}")
@@ -35,23 +40,26 @@ public class VacancyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Vacancy>> getAllActiveVacancies() {
-        return ResponseEntity.ok(vacancyService.getAllActiveVacancies());
+    public ResponseEntity<List<VacancyResponseDto>> getAllActiveVacancies() {
+        List<VacancyResponseDto> result = vacancyService.getAllActiveVacancies().stream()
+                .map(VacancyMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<Vacancy>> getVacanciesByCategory(@PathVariable Long categoryId) {
-        return ResponseEntity.ok(vacancyService.getVacanciesByCategory(categoryId));
+    public ResponseEntity<List<VacancyResponseDto>> getVacanciesByCategory(@PathVariable Long categoryId) {
+        List<VacancyResponseDto> result = vacancyService.getVacanciesByCategory(categoryId).stream()
+                .map(VacancyMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/{id}/respond")
-    public ResponseEntity<RespondedApplicant> respondToVacancy(@PathVariable Long id,
-                                                               @RequestBody RespondedApplicant response) {
-        return ResponseEntity.ok(vacancyService.respondToVacancy(id, response));
-    }
-
-    @GetMapping("/{id}/applicants")
-    public ResponseEntity<List<User>> getApplicantsForVacancy(@PathVariable Long id) {
-        return ResponseEntity.ok(vacancyService.getApplicantsForVacancy(id));
+    @GetMapping("/responded-by/{applicantId}")
+    public ResponseEntity<List<VacancyResponseDto>> getVacanciesRespondedByApplicant(@PathVariable Long applicantId) {
+        List<VacancyResponseDto> result = vacancyService.getVacanciesByApplicant(applicantId).stream()
+                .map(VacancyMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(result);
     }
 }

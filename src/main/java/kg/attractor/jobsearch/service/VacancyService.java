@@ -25,4 +25,6 @@ public interface VacancyService {
     RespondedApplicant respondToVacancy(Long vacancyId, RespondedApplicant response);
 
     List<User> getApplicantsForVacancy(Long vacancyId);
+
+    List<Vacancy> getVacanciesByApplicant(Long applicantId);
 }
