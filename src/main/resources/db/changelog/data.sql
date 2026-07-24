@@ -38,12 +38,12 @@ INSERT INTO contact_types (type) VALUES ('Telegram');
 INSERT INTO contact_types (type) VALUES ('Email');
 INSERT INTO contact_types (type) VALUES ('LinkedIn');
 
-INSERT INTO contacts_info (type_id, resume_id, "value")
+INSERT INTO contacts_info (type_id, resume_id, contact_value)
 VALUES ((SELECT id FROM contact_types WHERE type = 'Telegram'),
         (SELECT id FROM resumes WHERE name = 'Java Backend разработчик'),
         '@ivan_dev');
 
-INSERT INTO contacts_info (type_id, resume_id, "value")
+INSERT INTO contacts_info (type_id, resume_id, contact_value)
 VALUES ((SELECT id FROM contact_types WHERE type = 'Email'),
         (SELECT id FROM resumes WHERE name = 'Java Backend разработчик'),
         'ivan@mail.com');

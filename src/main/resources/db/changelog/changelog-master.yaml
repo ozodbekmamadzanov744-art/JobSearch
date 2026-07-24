@@ -169,7 +169,7 @@ databaseChangeLog:
                   name: resume_id
                   type: BIGINT
               - column:
-                  name: '"value"'
+                  name: contact_value
                   type: VARCHAR(255)
         - addForeignKeyConstraint:
             baseTableName: contacts_info
@@ -391,7 +391,7 @@ databaseChangeLog:
       author: Ozodbek Mamadjanov
       changes:
         - sqlFile:
-            path: db/changelog/data.sql
+            path: data.sql
             relativeToChangelogFile: true
             splitStatements: true
             stripComments: true
