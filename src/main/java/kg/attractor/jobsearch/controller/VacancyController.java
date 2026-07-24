@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
+import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.VacancyRequestDto;
 import kg.attractor.jobsearch.dto.VacancyResponseDto;
 import kg.attractor.jobsearch.mapper.VacancyMapper;
@@ -21,13 +22,13 @@ public class VacancyController {
     }
 
     @PostMapping
-    public ResponseEntity<VacancyResponseDto> createVacancy(@RequestBody VacancyRequestDto dto) {
+    public ResponseEntity<VacancyResponseDto> createVacancy(@Valid @RequestBody VacancyRequestDto dto) {
         Vacancy vacancy = VacancyMapper.toModel(dto);
         return ResponseEntity.ok(VacancyMapper.toDto(vacancyService.createVacancy(vacancy)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<VacancyResponseDto> updateVacancy(@PathVariable Long id,
+    public ResponseEntity<VacancyResponseDto> updateVacancy(@PathVariable Long id, @Valid
                                                             @RequestBody VacancyRequestDto dto) {
         Vacancy vacancy = VacancyMapper.toModel(dto);
         return ResponseEntity.ok(VacancyMapper.toDto(vacancyService.updateVacancy(id, vacancy)));

@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
+import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.RespondedApplicantRequestDto;
 import kg.attractor.jobsearch.dto.RespondedApplicantResponseDto;
 import kg.attractor.jobsearch.dto.UserResponseDto;
@@ -23,7 +24,7 @@ public class RespondedApplicantController {
     }
 
     @PostMapping("/{id}/respond")
-    public ResponseEntity<RespondedApplicantResponseDto> respondToVacancy(@PathVariable Long id,
+    public ResponseEntity<RespondedApplicantResponseDto> respondToVacancy(@PathVariable Long id, @Valid
                                                                           @RequestBody RespondedApplicantRequestDto dto) {
         RespondedApplicant respondedApplicant = RespondedApplicantMapper.toModel(dto);
         RespondedApplicant saved = vacancyService.respondToVacancy(id, respondedApplicant);
