@@ -18,8 +18,7 @@ public class ContactInfoDaoImpl implements ContactInfoDao {
 
     @Override
     public ContactInfo save(ContactInfo contactInfo) {
-        String sql = "INSERT INTO contacts_info (type_id, resume_id, \"value\") VALUES (?, ?, ?)";
-
+        String sql = "INSERT INTO contacts_info (type_id, resume_id, contact_value) VALUES (?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -82,7 +81,6 @@ public class ContactInfoDaoImpl implements ContactInfoDao {
         contactInfo.setId(resultSet.getLong("id"));
         contactInfo.setTypeId(resultSet.getLong("type_id"));
         contactInfo.setResumeId(resultSet.getLong("resume_id"));
-        contactInfo.setValue(resultSet.getString("\"value\""));
-        return contactInfo;
+        contactInfo.setValue(resultSet.getString("contact_value"));        return contactInfo;
     }
 }
