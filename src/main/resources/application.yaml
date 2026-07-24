@@ -6,10 +6,12 @@ spring:
     driver-class-name: org.h2.Driver
     username: ozodbek
     password: 2006
-  sql:
-    init:
-      mode: always
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
   h2:
     console:
       enabled: true
       path: /h2-console
+
+server:
+   port: 8090
