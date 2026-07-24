@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.mapper;
 
+import kg.attractor.jobsearch.dto.UserProfileUpdateDto;
 import kg.attractor.jobsearch.dto.UserRegistrationDto;
 import kg.attractor.jobsearch.dto.UserResponseDto;
 import kg.attractor.jobsearch.model.User;
@@ -33,5 +34,14 @@ public class UserMapper {
         dto.setAvatar(user.getAvatar());
         dto.setAccountType(user.getAccountType());
         return dto;
+    }
+
+    public static User toModel(UserProfileUpdateDto dto) {
+        User user = new User();
+        user.setName(dto.getName());
+        user.setSurname(dto.getSurname());
+        user.setAge(dto.getAge());
+        user.setPhoneNumber(dto.getPhoneNumber());
+        return user;
     }
 }
