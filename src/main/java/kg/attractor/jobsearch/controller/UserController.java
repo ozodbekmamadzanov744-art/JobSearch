@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
+import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.UserProfileUpdateDto;
 import kg.attractor.jobsearch.dto.UserResponseDto;
 import kg.attractor.jobsearch.mapper.UserMapper;
@@ -28,7 +29,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> updateProfile(@PathVariable Long id,
-                                                         @RequestBody UserProfileUpdateDto dto) {
+                                                         @Valid @RequestBody UserProfileUpdateDto dto) {
         User updates = UserMapper.toModel(dto);
         return ResponseEntity.ok(UserMapper.toDto(userService.updateProfile(id, updates)));
     }

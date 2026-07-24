@@ -27,7 +27,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User register(User user) {
         if (existsByEmail(user.getEmail())) {
-            throw new IllegalArgumentException("Пользователь с email " + user.getEmail() + " уже зарегистрирован");
+            throw new kg.attractor.jobsearch.exception.EmailAlreadyExistsException(
+                    "Пользователь с email " + user.getEmail() + " уже зарегистрирован");
         }
 
         if (user.getAvatar() == null || user.getAvatar().isBlank()) {
@@ -40,7 +41,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(Long id) {
         return userDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("Пользователь с id " + id + " не найден"));
+                .orElseThrow(() -> new kg.attractor.jobsearch.exception.ResourceNotFoundException("Пользователь с id " + id + " не найден"));
     }
 
     @Override
@@ -51,13 +52,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByPhoneNumber(String phoneNumber) {
         return userDao.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new RuntimeException("Пользователь с телефоном " + phoneNumber + " не найден"));
+                .orElseThrow(() -> new kg.attractor.jobsearch.exception.ResourceNotFoundException("Пользователь с id " + phoneNumber + " не найден"));
     }
 
     @Override
     public User findByEmail(String email) {
         return userDao.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Пользователь с email " + email + " не найден"));
+                .orElseThrow(() -> new kg.attractor.jobsearch.exception.ResourceNotFoundException("Пользователь с id " + email + " не найден"));
     }
 
     @Override

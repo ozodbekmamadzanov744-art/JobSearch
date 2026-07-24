@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
+import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.ResumeRequestDto;
 import kg.attractor.jobsearch.dto.ResumeResponseDto;
 import kg.attractor.jobsearch.mapper.ResumeMapper;
@@ -24,7 +25,7 @@ public class ResumeController {
     }
 
     @PostMapping
-    public ResponseEntity<ResumeResponseDto> createResume(@RequestBody ResumeRequestDto dto) {
+    public ResponseEntity<ResumeResponseDto> createResume(@Valid @RequestBody ResumeRequestDto dto) {
         Resume resume = ResumeMapper.toModel(dto);
         List<EducationInfo> educationList = mapEducation(dto);
         List<WorkExperienceInfo> workExperienceList = mapWorkExperience(dto);
@@ -34,8 +35,7 @@ public class ResumeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResumeResponseDto> updateResume(@PathVariable Long id,
-                                                          @RequestBody ResumeRequestDto dto) {
+    public ResponseEntity<ResumeResponseDto> updateResume(@PathVariable Long id, @Valid @RequestBody ResumeRequestDto dto) {
         Resume resume = ResumeMapper.toModel(dto);
         List<EducationInfo> educationList = mapEducation(dto);
         List<WorkExperienceInfo> workExperienceList = mapWorkExperience(dto);

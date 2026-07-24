@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
+import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.UserRegistrationDto;
 import kg.attractor.jobsearch.dto.UserResponseDto;
 import kg.attractor.jobsearch.mapper.UserMapper;
@@ -22,7 +23,7 @@ public class AuthController {
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<UserResponseDto> registration(@RequestBody UserRegistrationDto dto) {
+    public ResponseEntity<UserResponseDto> registration(@Valid @RequestBody UserRegistrationDto dto) {
         User user = UserMapper.toModel(dto);
         User registered = userService.register(user);
         return ResponseEntity.ok(UserMapper.toDto(registered));
