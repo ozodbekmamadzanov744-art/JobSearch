@@ -31,10 +31,14 @@ public class ResumeDaoImpl implements ResumeDao {
             statement.setLong(3, resume.getCategoryId());
             statement.setDouble(4, resume.getSalary());
             statement.setBoolean(5, Boolean.TRUE.equals(resume.getIsActive()));
-            statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
-            statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
+            LocalDateTime now = LocalDateTime.now();
+            statement.setTimestamp(6, Timestamp.valueOf(now));
+            statement.setTimestamp(7, Timestamp.valueOf(now));
 
             statement.executeUpdate();
+
+            resume.setCreatedDate(now);
+            resume.setUpdateTime(now);
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
@@ -60,10 +64,13 @@ public class ResumeDaoImpl implements ResumeDao {
             statement.setLong(2, resume.getCategoryId());
             statement.setDouble(3, resume.getSalary());
             statement.setBoolean(4, Boolean.TRUE.equals(resume.getIsActive()));
-            statement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+            LocalDateTime now = LocalDateTime.now();
+            statement.setTimestamp(5, Timestamp.valueOf(now));
             statement.setLong(6, resume.getId());
 
             statement.executeUpdate();
+
+            resume.setUpdateTime(now);
         } catch (SQLException e) {
             throw new RuntimeException("Ошибка при обновлении резюме", e);
         }
