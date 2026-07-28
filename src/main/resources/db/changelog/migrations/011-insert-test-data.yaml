@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-insert-test-data
+      author: Ozodbek Mamadjanov
+      changes:
+        - sqlFile:
+            path: ../data.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true

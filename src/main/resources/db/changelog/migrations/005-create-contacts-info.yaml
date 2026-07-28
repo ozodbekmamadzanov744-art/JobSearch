@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-create-contacts-info
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: contacts_info
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: type_id
+                  type: BIGINT
+              - column:
+                  name: resume_id
+                  type: BIGINT
+              - column:
+                  name: contact_value
+                  type: VARCHAR(255)
+        - addForeignKeyConstraint:
+            baseTableName: contacts_info
+            baseColumnNames: type_id
+            referencedTableName: contact_types
+            referencedColumnNames: id
+            constraintName: fk_contacts_info_type
+        - addForeignKeyConstraint:
+            baseTableName: contacts_info
+            baseColumnNames: resume_id
+            referencedTableName: resumes
+            referencedColumnNames: id
+            constraintName: fk_contacts_info_resume

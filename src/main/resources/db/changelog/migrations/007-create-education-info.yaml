@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-create-education-info
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: education_info
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: resume_id
+                  type: BIGINT
+              - column:
+                  name: institution
+                  type: VARCHAR(255)
+              - column:
+                  name: program
+                  type: VARCHAR(255)
+              - column:
+                  name: start_date
+                  type: DATE
+              - column:
+                  name: end_date
+                  type: DATE
+              - column:
+                  name: degree
+                  type: VARCHAR(255)
+        - addForeignKeyConstraint:
+            baseTableName: education_info
+            baseColumnNames: resume_id
+            referencedTableName: resumes
+            referencedColumnNames: id
+            constraintName: fk_education_info_resume
