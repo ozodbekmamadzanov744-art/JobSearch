@@ -1,15 +1,14 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.RespondedApplicantDao;
-import kg.attractor.jobsearch.dao.ResumeDao;
-import kg.attractor.jobsearch.dao.UserDao;
 import kg.attractor.jobsearch.dao.VacancyDao;
-import kg.attractor.jobsearch.exception.DuplicateResponseException;
 import kg.attractor.jobsearch.exception.ResourceNotFoundException;
 import kg.attractor.jobsearch.model.RespondedApplicant;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.Vacancy;
+import kg.attractor.jobsearch.service.RespondedApplicantService;
+import kg.attractor.jobsearch.service.ResumeService;
+import kg.attractor.jobsearch.service.UserService;
 import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,9 +20,9 @@ import java.util.List;
 public class VacancyServiceImpl implements VacancyService {
 
     private final VacancyDao vacancyDao;
-    private final RespondedApplicantDao respondedApplicantDao;
-    private final ResumeDao resumeDao;
-    private final UserDao userDao;
+    private final RespondedApplicantService respondedApplicantService;
+    private final ResumeService resumeService;
+    private final UserService userService;
 
     @Override
     public Vacancy createVacancy(Vacancy vacancy) {
@@ -76,40 +75,27 @@ public class VacancyServiceImpl implements VacancyService {
     @Override
     public RespondedApplicant respondToVacancy(Long vacancyId, RespondedApplicant response) {
         getVacancyById(vacancyId);
-
         response.setVacancyId(vacancyId);
-
-        if (respondedApplicantDao.existsByResumeIdAndVacancyId(response.getResumeId(), vacancyId)) {
-            throw new DuplicateResponseException("Соискатель уже откликнулся на эту вакансию этим резюме");
-        }
-
-        return respondedApplicantDao.save(response);
+        return respondedApplicantService.createResponse(response);
     }
 
     @Override
     public List<User> getApplicantsForVacancy(Long vacancyId) {
-        return respondedApplicantDao.findByVacancyId(vacancyId).stream()
-                .map(responded -> resumeDao.findById(responded.getResumeId()))
-                .filter(java.util.Optional::isPresent)
-                .map(java.util.Optional::get)
+        return respondedApplicantService.findByVacancyId(vacancyId).stream()
+                .map(RespondedApplicant::getResumeId)
+                .map(resumeService::getResumeById)
                 .map(Resume::getApplicantId)
-                .map(userDao::findById)
-                .filter(java.util.Optional::isPresent)
-                .map(java.util.Optional::get)
+                .map(userService::getUserById)
                 .toList();
     }
 
     @Override
     public List<Vacancy> getVacanciesByApplicant(Long applicantId) {
-        List<Resume> resumes = resumeDao.findByApplicantId(applicantId);
-
-        return resumes.stream()
-                .flatMap(resume -> respondedApplicantDao.findByResumeId(resume.getId()).stream())
+        return resumeService.getResumesByApplicant(applicantId).stream()
+                .flatMap(resume -> respondedApplicantService.findByResumeId(resume.getId()).stream())
                 .map(RespondedApplicant::getVacancyId)
                 .distinct()
-                .map(vacancyDao::findById)
-                .filter(java.util.Optional::isPresent)
-                .map(java.util.Optional::get)
+                .map(this::getVacancyById)
                 .toList();
     }
 }
