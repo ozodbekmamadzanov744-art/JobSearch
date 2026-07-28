@@ -3,10 +3,10 @@ INSERT INTO categories (name, parent_id) VALUES ('Backend разработка',
 INSERT INTO categories (name, parent_id) VALUES ('Frontend разработка', (SELECT id FROM categories WHERE name = 'IT'));
 
 INSERT INTO users (name, surname, age, email, password, phone_number, avatar, account_type)
-VALUES ('Иван', 'Иванов', 25, 'ivan@mail.com', 'pass123', '+996700111222', NULL, 'APPLICANT');
+VALUES ('Иван', 'Иванов', 25, 'ivan@mail.com', '$2b$10$sNouNuCqHRf5Q8s.noOjougLR5hTbuFQo5AKhxcU.i4Co4aIKPG2C', '+996700111222', NULL, 'APPLICANT');
 
 INSERT INTO users (name, surname, age, email, password, phone_number, avatar, account_type)
-VALUES ('ООО Технологии', NULL, NULL, 'hr@technologii.kg', 'pass456', '+996700333444', NULL, 'EMPLOYER');
+VALUES ('ООО Технологии', NULL, NULL, 'hr@technologii.kg', '$2b$10$ZgqVyVCwxVymzJF0n4Iqgu10DEKRRs/6eeWw4xJnGlj63BWpIZdQW', '+996700333444', NULL, 'EMPLOYER');
 
 INSERT INTO resumes (applicant_id, name, category_id, salary, is_active, created_date, update_time)
 VALUES ((SELECT id FROM users WHERE email = 'ivan@mail.com'),
