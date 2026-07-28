@@ -11,10 +11,12 @@ import kg.attractor.jobsearch.service.ResumeService;
 import kg.attractor.jobsearch.service.UserService;
 import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VacancyServiceImpl implements VacancyService {
@@ -26,6 +28,7 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public Vacancy createVacancy(Vacancy vacancy) {
+        log.info("Создание вакансии '{}' от работодателя id={}", vacancy.getName(), vacancy.getAuthorId());
         if (vacancy.getIsActive() == null) {
             vacancy.setIsActive(true);
         }
@@ -34,6 +37,7 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public Vacancy updateVacancy(Long id, Vacancy vacancy) {
+        log.info("Обновление вакансии id={}", id);
         Vacancy existing = getVacancyById(id);
         vacancy.setId(existing.getId());
         vacancy.setAuthorId(existing.getAuthorId());
@@ -43,6 +47,7 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public void deleteVacancy(Long id) {
+        log.info("Удаление вакансии id={}", id);
         getVacancyById(id);
         vacancyDao.delete(id);
     }
@@ -74,6 +79,7 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public RespondedApplicant respondToVacancy(Long vacancyId, RespondedApplicant response) {
+        log.info("Соискатель откликается резюме id={} на вакансию id={}", response.getResumeId(), vacancyId);
         getVacancyById(vacancyId);
         response.setVacancyId(vacancyId);
         return respondedApplicantService.createResponse(response);
