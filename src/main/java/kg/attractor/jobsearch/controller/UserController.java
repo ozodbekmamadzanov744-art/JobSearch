@@ -27,7 +27,7 @@ public class UserController {
         return ResponseEntity.ok(UserMapper.toDto(userService.getUserById(id)));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/profile")
     public ResponseEntity<UserResponseDto> updateProfile(@PathVariable Long id,
                                                          @Valid @RequestBody UserProfileUpdateDto dto) {
         User updates = UserMapper.toModel(dto);

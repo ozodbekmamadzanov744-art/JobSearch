@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-create-work-experience-info
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: work_experience_info
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: resume_id
+                  type: BIGINT
+              - column:
+                  name: years
+                  type: INT
+              - column:
+                  name: company_name
+                  type: VARCHAR(255)
+              - column:
+                  name: position
+                  type: VARCHAR(255)
+              - column:
+                  name: responsibilities
+                  type: TEXT
+        - addForeignKeyConstraint:
+            baseTableName: work_experience_info
+            baseColumnNames: resume_id
+            referencedTableName: resumes
+            referencedColumnNames: id
+            constraintName: fk_work_experience_info_resume

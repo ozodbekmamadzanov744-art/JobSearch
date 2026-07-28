@@ -40,6 +40,19 @@ public class VacancyController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<VacancyResponseDto> getVacancyById(@PathVariable Long id) {
+        return ResponseEntity.ok(VacancyMapper.toDto(vacancyService.getVacancyById(id)));
+    }
+
+    @GetMapping("/author/{authorId}")
+    public ResponseEntity<List<VacancyResponseDto>> getVacanciesByAuthor(@PathVariable Long authorId) {
+        List<VacancyResponseDto> result = vacancyService.getVacanciesByAuthor(authorId).stream()
+                .map(VacancyMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping
     public ResponseEntity<List<VacancyResponseDto>> getAllActiveVacancies() {
         List<VacancyResponseDto> result = vacancyService.getAllActiveVacancies().stream()

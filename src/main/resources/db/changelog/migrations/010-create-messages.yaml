@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-create-messages
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: messages
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: responded_applicants_id
+                  type: BIGINT
+              - column:
+                  name: content
+                  type: TEXT
+              - column:
+                  name: timestamp
+                  type: TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: messages
+            baseColumnNames: responded_applicants_id
+            referencedTableName: responded_applicants
+            referencedColumnNames: id
+            constraintName: fk_messages_responded_applicants
