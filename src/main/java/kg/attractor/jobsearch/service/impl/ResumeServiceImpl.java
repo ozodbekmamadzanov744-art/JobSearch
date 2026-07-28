@@ -1,13 +1,15 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.EducationInfoDao;
 import kg.attractor.jobsearch.dao.ResumeDao;
-import kg.attractor.jobsearch.dao.WorkExperienceInfoDao;
 import kg.attractor.jobsearch.exception.ResourceNotFoundException;
+import kg.attractor.jobsearch.model.ContactInfo;
 import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
+import kg.attractor.jobsearch.service.ContactInfoService;
+import kg.attractor.jobsearch.service.EducationInfoService;
 import kg.attractor.jobsearch.service.ResumeService;
+import kg.attractor.jobsearch.service.WorkExperienceInfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +20,13 @@ import java.util.List;
 public class ResumeServiceImpl implements ResumeService {
 
     private final ResumeDao resumeDao;
-    private final EducationInfoDao educationInfoDao;
-    private final WorkExperienceInfoDao workExperienceInfoDao;
+    private final EducationInfoService educationInfoService;
+    private final WorkExperienceInfoService workExperienceInfoService;
+    private final ContactInfoService contactInfoService;
 
     @Override
-    public Resume createResume(Resume resume, List<EducationInfo> educationList, List<WorkExperienceInfo> workExperienceList) {
+    public Resume createResume(Resume resume, List<EducationInfo> educationList,
+                               List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList) {
         if (resume.getIsActive() == null) {
             resume.setIsActive(true);
         }
@@ -31,22 +35,27 @@ public class ResumeServiceImpl implements ResumeService {
 
         saveEducation(saved.getId(), educationList);
         saveWorkExperience(saved.getId(), workExperienceList);
+        saveContacts(saved.getId(), contactList);
 
         return saved;
     }
 
     @Override
-    public Resume updateResume(Long id, Resume resume, List<EducationInfo> educationList, List<WorkExperienceInfo> workExperienceList) {
+    public Resume updateResume(Long id, Resume resume, List<EducationInfo> educationList,
+                               List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList) {
         Resume existing = getResumeById(id);
         resume.setId(existing.getId());
         resume.setApplicantId(existing.getApplicantId());
         resumeDao.update(resume);
 
-        educationInfoDao.deleteByResumeId(id);
+        educationInfoService.deleteByResumeId(id);
         saveEducation(id, educationList);
 
-        workExperienceInfoDao.deleteByResumeId(id);
+        workExperienceInfoService.deleteByResumeId(id);
         saveWorkExperience(id, workExperienceList);
+
+        contactInfoService.deleteByResumeId(id);
+        saveContacts(id, contactList);
 
         return resume;
     }
@@ -54,8 +63,9 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public void deleteResume(Long id) {
         getResumeById(id);
-        educationInfoDao.deleteByResumeId(id);
-        workExperienceInfoDao.deleteByResumeId(id);
+        educationInfoService.deleteByResumeId(id);
+        workExperienceInfoService.deleteByResumeId(id);
+        contactInfoService.deleteByResumeId(id);
         resumeDao.delete(id);
     }
 
@@ -86,12 +96,17 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     public List<EducationInfo> getEducationByResumeId(Long resumeId) {
-        return educationInfoDao.findByResumeId(resumeId);
+        return educationInfoService.findByResumeId(resumeId);
     }
 
     @Override
     public List<WorkExperienceInfo> getWorkExperienceByResumeId(Long resumeId) {
-        return workExperienceInfoDao.findByResumeId(resumeId);
+        return workExperienceInfoService.findByResumeId(resumeId);
+    }
+
+    @Override
+    public List<ContactInfo> getContactsByResumeId(Long resumeId) {
+        return contactInfoService.findByResumeId(resumeId);
     }
 
     private void saveEducation(Long resumeId, List<EducationInfo> educationList) {
@@ -100,7 +115,7 @@ public class ResumeServiceImpl implements ResumeService {
         }
         for (EducationInfo education : educationList) {
             education.setResumeId(resumeId);
-            educationInfoDao.save(education);
+            educationInfoService.save(education);
         }
     }
 
@@ -110,7 +125,17 @@ public class ResumeServiceImpl implements ResumeService {
         }
         for (WorkExperienceInfo workExperience : workExperienceList) {
             workExperience.setResumeId(resumeId);
-            workExperienceInfoDao.save(workExperience);
+            workExperienceInfoService.save(workExperience);
+        }
+    }
+
+    private void saveContacts(Long resumeId, List<ContactInfo> contactList) {
+        if (contactList == null) {
+            return;
+        }
+        for (ContactInfo contact : contactList) {
+            contact.setResumeId(resumeId);
+            contactInfoService.save(contact);
         }
     }
 }
