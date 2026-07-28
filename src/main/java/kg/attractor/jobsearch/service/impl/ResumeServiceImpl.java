@@ -11,12 +11,14 @@ import kg.attractor.jobsearch.service.EducationInfoService;
 import kg.attractor.jobsearch.service.ResumeService;
 import kg.attractor.jobsearch.service.WorkExperienceInfoService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ResumeServiceImpl implements ResumeService {
 
     private final ResumeDao resumeDao;
@@ -27,6 +29,7 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public Resume createResume(Resume resume, List<EducationInfo> educationList,
                                List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList) {
+        log.info("Создание резюме '{}' для соискателя id={}", resume.getName(), resume.getApplicantId());
         if (resume.getIsActive() == null) {
             resume.setIsActive(true);
         }
@@ -37,12 +40,14 @@ public class ResumeServiceImpl implements ResumeService {
         saveWorkExperience(saved.getId(), workExperienceList);
         saveContacts(saved.getId(), contactList);
 
+        log.info("Резюме id={} успешно создано", saved.getId());
         return saved;
     }
 
     @Override
     public Resume updateResume(Long id, Resume resume, List<EducationInfo> educationList,
                                List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList) {
+        log.info("Обновление резюме id={}", id);
         Resume existing = getResumeById(id);
         resume.setId(existing.getId());
         resume.setApplicantId(existing.getApplicantId());
@@ -62,6 +67,7 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     public void deleteResume(Long id) {
+        log.info("Удаление резюме id={}", id);
         getResumeById(id);
         educationInfoService.deleteByResumeId(id);
         workExperienceInfoService.deleteByResumeId(id);
