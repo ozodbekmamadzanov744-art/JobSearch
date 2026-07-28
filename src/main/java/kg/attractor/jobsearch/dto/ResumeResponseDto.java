@@ -22,4 +22,5 @@ public class ResumeResponseDto {
     private LocalDateTime updateTime;
     private List<EducationInfoDto> educationList;
     private List<WorkExperienceInfoDto> workExperienceList;
+    private List<ContactInfoDto> contactList;
 }

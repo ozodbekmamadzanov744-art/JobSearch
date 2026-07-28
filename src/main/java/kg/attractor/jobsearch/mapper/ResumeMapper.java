@@ -1,9 +1,7 @@
 package kg.attractor.jobsearch.mapper;
 
-import kg.attractor.jobsearch.dto.EducationInfoDto;
-import kg.attractor.jobsearch.dto.ResumeRequestDto;
-import kg.attractor.jobsearch.dto.ResumeResponseDto;
-import kg.attractor.jobsearch.dto.WorkExperienceInfoDto;
+import kg.attractor.jobsearch.dto.*;
+import kg.attractor.jobsearch.model.ContactInfo;
 import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
@@ -25,7 +23,8 @@ public class ResumeMapper {
         return resume;
     }
 
-    public static ResumeResponseDto toDto(Resume resume, List<EducationInfo> educationList, List<WorkExperienceInfo> workExperienceList) {
+    public static ResumeResponseDto toDto(Resume resume, List<EducationInfo> educationList,
+                                          List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList) {
         ResumeResponseDto dto = new ResumeResponseDto();
         dto.setId(resume.getId());
         dto.setApplicantId(resume.getApplicantId());
@@ -37,6 +36,22 @@ public class ResumeMapper {
         dto.setUpdateTime(resume.getUpdateTime());
         dto.setEducationList(educationList.stream().map(ResumeMapper::toDto).toList());
         dto.setWorkExperienceList(workExperienceList.stream().map(ResumeMapper::toDto).toList());
+        dto.setContactList(contactList.stream().map(ResumeMapper::toDto).toList());
+        return dto;
+    }
+
+    public static ContactInfo toModel(ContactInfoDto dto) {
+        ContactInfo contactInfo = new ContactInfo();
+        contactInfo.setTypeId(dto.getTypeId());
+        contactInfo.setValue(dto.getValue());
+        return contactInfo;
+    }
+
+    public static ContactInfoDto toDto(ContactInfo contactInfo) {
+        ContactInfoDto dto = new ContactInfoDto();
+        dto.setId(contactInfo.getId());
+        dto.setTypeId(contactInfo.getTypeId());
+        dto.setValue(contactInfo.getValue());
         return dto;
     }
 
