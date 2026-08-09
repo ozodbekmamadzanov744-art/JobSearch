@@ -5,8 +5,10 @@ import kg.attractor.jobsearch.dto.UserProfileUpdateDto;
 import kg.attractor.jobsearch.dto.UserResponseDto;
 import kg.attractor.jobsearch.mapper.UserMapper;
 import kg.attractor.jobsearch.model.User;
+import kg.attractor.jobsearch.security.CustomUserDetails;
 import kg.attractor.jobsearch.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,9 +31,11 @@ public class UserController {
 
     @PutMapping("/{id}/profile")
     public ResponseEntity<UserResponseDto> updateProfile(@PathVariable Long id,
-                                                         @Valid @RequestBody UserProfileUpdateDto dto) {
+                                                         @Valid @RequestBody UserProfileUpdateDto dto,
+                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
         User updates = UserMapper.toModel(dto);
-        return ResponseEntity.ok(UserMapper.toDto(userService.updateProfile(id, updates)));
+        User updated = userService.updateProfile(id, updates, userDetails.getUser().getId());
+        return ResponseEntity.ok(UserMapper.toDto(updated));
     }
 
     @GetMapping("/search/name")
@@ -59,8 +63,9 @@ public class UserController {
 
     @PostMapping("/{id}/avatar")
     public ResponseEntity<Void> uploadAvatar(@PathVariable Long id,
-                                             @RequestParam("file") MultipartFile file) {
-        userService.uploadAvatar(id, file);
+                                             @RequestParam("file") MultipartFile file,
+                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.uploadAvatar(id, file, userDetails.getUser().getId());
         return ResponseEntity.ok().build();
     }
 }

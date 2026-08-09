@@ -1,6 +1,7 @@
 package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dao.ResumeDao;
+import kg.attractor.jobsearch.exception.ForbiddenOperationException;
 import kg.attractor.jobsearch.exception.ResourceNotFoundException;
 import kg.attractor.jobsearch.model.ContactInfo;
 import kg.attractor.jobsearch.model.EducationInfo;
@@ -46,9 +47,13 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     public Resume updateResume(Long id, Resume resume, List<EducationInfo> educationList,
-                               List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList) {
-        log.info("Обновление резюме id={}", id);
+                               List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList, Long currentUserId) {
         Resume existing = getResumeById(id);
+
+        if (!existing.getApplicantId().equals(currentUserId)) {
+            throw new ForbiddenOperationException("Вы не являетесь владельцем этого резюме");
+        }
+
         resume.setId(existing.getId());
         resume.setApplicantId(existing.getApplicantId());
         resumeDao.update(resume);
@@ -66,9 +71,13 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
-    public void deleteResume(Long id) {
-        log.info("Удаление резюме id={}", id);
-        getResumeById(id);
+    public void deleteResume(Long id, Long currentUserId) {
+        Resume existing = getResumeById(id);
+
+        if (!existing.getApplicantId().equals(currentUserId)) {
+            throw new ForbiddenOperationException("Вы не являетесь владельцем этого резюме");
+        }
+
         educationInfoService.deleteByResumeId(id);
         workExperienceInfoService.deleteByResumeId(id);
         contactInfoService.deleteByResumeId(id);

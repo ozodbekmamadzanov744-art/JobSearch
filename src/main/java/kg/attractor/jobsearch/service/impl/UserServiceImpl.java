@@ -2,8 +2,12 @@ package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dao.UserDao;
 import kg.attractor.jobsearch.exception.EmailAlreadyExistsException;
+import kg.attractor.jobsearch.exception.ForbiddenOperationException;
 import kg.attractor.jobsearch.exception.ResourceNotFoundException;
+import kg.attractor.jobsearch.model.Role;
 import kg.attractor.jobsearch.model.User;
+import kg.attractor.jobsearch.service.RoleService;
+import kg.attractor.jobsearch.service.UserRoleService;
 import kg.attractor.jobsearch.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +33,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
+    private final UserRoleService userRoleService;
 
     @Override
     public User register(User user) {
@@ -46,8 +52,14 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
+        String requestedRole = user.getAccountType();
         User saved = userDao.save(user);
-        log.info("Пользователь id={} успешно зарегистрирован", saved.getId());
+
+        Role role = roleService.getRoleByName(requestedRole);
+        userRoleService.assignRole(saved.getId(), role.getId());
+        saved.setAccountType(role.getName());
+
+        log.info("Пользователь id={} успешно зарегистрирован с ролью {}", saved.getId(), role.getName());
         return saved;
     }
 
@@ -75,7 +87,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void uploadAvatar(Long id, MultipartFile file) {
+    public void uploadAvatar(Long id, MultipartFile file, Long currentUserId) {
+        if (!id.equals(currentUserId)) {
+            throw new ForbiddenOperationException("Нельзя загрузить аватар другому пользователю");
+        }
+
         log.info("Загрузка аватара для пользователя id={}", id);
         User user = getUserById(id);
 
@@ -119,7 +135,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateProfile(Long id, User updates) {
+    public User updateProfile(Long id, User updates, Long currentUserId) {
+        if (!id.equals(currentUserId)) {
+            throw new ForbiddenOperationException("Нельзя редактировать профиль другого пользователя");
+        }
+
         log.info("Обновление профиля пользователя id={}", id);
         User existing = getUserById(id);
         existing.setName(updates.getName());

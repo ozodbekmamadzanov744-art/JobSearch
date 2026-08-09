@@ -1,6 +1,7 @@
 package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dao.VacancyDao;
+import kg.attractor.jobsearch.exception.ForbiddenOperationException;
 import kg.attractor.jobsearch.exception.ResourceNotFoundException;
 import kg.attractor.jobsearch.model.RespondedApplicant;
 import kg.attractor.jobsearch.model.Resume;
@@ -36,9 +37,13 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
-    public Vacancy updateVacancy(Long id, Vacancy vacancy) {
-        log.info("Обновление вакансии id={}", id);
+    public Vacancy updateVacancy(Long id, Vacancy vacancy, Long currentUserId) {
         Vacancy existing = getVacancyById(id);
+
+        if (!existing.getAuthorId().equals(currentUserId)) {
+            throw new ForbiddenOperationException("Вы не являетесь автором этой вакансии");
+        }
+
         vacancy.setId(existing.getId());
         vacancy.setAuthorId(existing.getAuthorId());
         vacancyDao.update(vacancy);
@@ -46,9 +51,13 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
-    public void deleteVacancy(Long id) {
-        log.info("Удаление вакансии id={}", id);
-        getVacancyById(id);
+    public void deleteVacancy(Long id, Long currentUserId) {
+        Vacancy existing = getVacancyById(id);
+
+        if (!existing.getAuthorId().equals(currentUserId)) {
+            throw new ForbiddenOperationException("Вы не являетесь автором этой вакансии");
+        }
+
         vacancyDao.delete(id);
     }
 

@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-create-roles
+      author: Ozodbek Mamadjanov
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: APPLICANT
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: EMPLOYER

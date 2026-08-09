@@ -5,8 +5,10 @@ import kg.attractor.jobsearch.dto.VacancyRequestDto;
 import kg.attractor.jobsearch.dto.VacancyResponseDto;
 import kg.attractor.jobsearch.mapper.VacancyMapper;
 import kg.attractor.jobsearch.model.Vacancy;
+import kg.attractor.jobsearch.security.CustomUserDetails;
 import kg.attractor.jobsearch.service.VacancyService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,15 +30,16 @@ public class VacancyController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<VacancyResponseDto> updateVacancy(@PathVariable Long id, @Valid
-                                                            @RequestBody VacancyRequestDto dto) {
+    public ResponseEntity<VacancyResponseDto> updateVacancy(@PathVariable Long id, @Valid @RequestBody VacancyRequestDto dto,
+                                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
         Vacancy vacancy = VacancyMapper.toModel(dto);
-        return ResponseEntity.ok(VacancyMapper.toDto(vacancyService.updateVacancy(id, vacancy)));
+        Vacancy updated = vacancyService.updateVacancy(id, vacancy, userDetails.getUser().getId());
+        return ResponseEntity.ok(VacancyMapper.toDto(updated));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVacancy(@PathVariable Long id) {
-        vacancyService.deleteVacancy(id);
+    public ResponseEntity<Void> deleteVacancy(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        vacancyService.deleteVacancy(id, userDetails.getUser().getId());
         return ResponseEntity.noContent().build();
     }
 
