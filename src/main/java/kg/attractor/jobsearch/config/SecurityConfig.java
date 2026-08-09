@@ -10,8 +10,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -19,7 +17,6 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -30,6 +27,20 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/registration").permitAll()
                         .requestMatchers(HttpMethod.GET, "/vacancies/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/resumes").hasRole("APPLICANT")
+                        .requestMatchers(HttpMethod.PUT, "/resumes/**").hasRole("APPLICANT")
+                        .requestMatchers(HttpMethod.DELETE, "/resumes/**").hasRole("APPLICANT")
+
+                        .requestMatchers(HttpMethod.GET, "/resumes/category/**").hasRole("EMPLOYER")
+                        .requestMatchers(HttpMethod.GET, "/resumes/applicant/**").hasRole("EMPLOYER")
+                        .requestMatchers(HttpMethod.GET, "/resumes/*").hasRole("EMPLOYER")
+                        .requestMatchers(HttpMethod.GET, "/resumes").hasRole("EMPLOYER")
+
+                        .requestMatchers(HttpMethod.POST, "/vacancies").hasRole("EMPLOYER")
+                        .requestMatchers(HttpMethod.PUT, "/vacancies/**").hasRole("EMPLOYER")
+                        .requestMatchers(HttpMethod.DELETE, "/vacancies/**").hasRole("EMPLOYER")
+
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)

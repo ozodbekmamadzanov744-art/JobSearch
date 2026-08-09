@@ -17,11 +17,10 @@ public interface UserService {
 
     User findByEmail(String email);
 
-    void uploadAvatar(Long id, MultipartFile file);
-
+    void uploadAvatar(Long id, MultipartFile file, Long currentUserId);
     boolean existsByEmail(String email);
 
-    User updateProfile(Long id, User updates);
+    User updateProfile(Long id, User updates, Long currentUserId);
 
 
 }

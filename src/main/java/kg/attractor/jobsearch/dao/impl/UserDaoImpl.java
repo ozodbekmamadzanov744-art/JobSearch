@@ -19,12 +19,18 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserDaoImpl implements UserDao {
 
+    private static final String SELECT_WITH_ROLE =
+            "SELECT u.*, r.name AS role_name " +
+                    "FROM users u " +
+                    "LEFT JOIN user_roles ur ON ur.user_id = u.id " +
+                    "LEFT JOIN roles r ON r.id = ur.role_id ";
+
     private final DataSource dataSource;
 
     @Override
     public User save(User user) {
-        String sql = "INSERT INTO users (name, surname, age, email, password, phone_number, avatar, account_type) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (name, surname, age, email, password, phone_number, avatar) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -40,7 +46,6 @@ public class UserDaoImpl implements UserDao {
             statement.setString(5, user.getPassword());
             statement.setString(6, user.getPhoneNumber());
             statement.setString(7, user.getAvatar());
-            statement.setString(8, user.getAccountType());
 
             statement.executeUpdate();
 
@@ -58,12 +63,12 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<User> findById(Long id) {
-        return findOneByField("id", id);
+        return findOneByField("u.id", id);
     }
 
     @Override
     public List<User> findByName(String name) {
-        String sql = "SELECT * FROM users WHERE name = ?";
+        String sql = SELECT_WITH_ROLE + "WHERE u.name = ?";
         List<User> users = new ArrayList<>();
 
         try (Connection connection = dataSource.getConnection();
@@ -85,12 +90,12 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<User> findByPhoneNumber(String phoneNumber) {
-        return findOneByField("phone_number", phoneNumber);
+        return findOneByField("u.phone_number", phoneNumber);
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        return findOneByField("email", email);
+        return findOneByField("u.email", email);
     }
 
     @Override
@@ -115,7 +120,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     private Optional<User> findOneByField(String fieldName, Object value) {
-        String sql = "SELECT * FROM users WHERE " + fieldName + " = ?";
+        String sql = SELECT_WITH_ROLE + "WHERE " + fieldName + " = ?";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -147,7 +152,7 @@ public class UserDaoImpl implements UserDao {
         user.setPassword(resultSet.getString("password"));
         user.setPhoneNumber(resultSet.getString("phone_number"));
         user.setAvatar(resultSet.getString("avatar"));
-        user.setAccountType(resultSet.getString("account_type"));
+        user.setAccountType(resultSet.getString("role_name"));
         return user;
     }
 

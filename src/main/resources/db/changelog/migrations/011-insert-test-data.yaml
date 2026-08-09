@@ -4,7 +4,7 @@ databaseChangeLog:
       author: Ozodbek Mamadjanov
       changes:
         - sqlFile:
-            path: ../data.sql
+            path: data.sql
             relativeToChangelogFile: true
             splitStatements: true
             stripComments: true

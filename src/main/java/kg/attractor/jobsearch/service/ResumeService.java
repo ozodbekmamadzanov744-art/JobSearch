@@ -13,9 +13,9 @@ public interface ResumeService {
                         List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList);
 
     Resume updateResume(Long id, Resume resume, List<EducationInfo> educationList,
-                        List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList);
+                        List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList, Long currentUserId);
 
-    void deleteResume(Long id);
+    void deleteResume(Long id, Long currentUserId);
 
     Resume getResumeById(Long id);
 

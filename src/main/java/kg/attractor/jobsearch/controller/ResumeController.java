@@ -8,8 +8,10 @@ import kg.attractor.jobsearch.model.ContactInfo;
 import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
+import kg.attractor.jobsearch.security.CustomUserDetails;
 import kg.attractor.jobsearch.service.ResumeService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,15 +35,17 @@ public class ResumeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResumeResponseDto> updateResume(@PathVariable Long id, @Valid @RequestBody ResumeRequestDto dto) {
+    public ResponseEntity<ResumeResponseDto> updateResume(@PathVariable Long id, @Valid @RequestBody ResumeRequestDto dto,
+                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
         Resume resume = ResumeMapper.toModel(dto);
-        Resume updated = resumeService.updateResume(id, resume, mapEducation(dto), mapWorkExperience(dto), mapContacts(dto));
+        Resume updated = resumeService.updateResume(id, resume, mapEducation(dto), mapWorkExperience(dto), mapContacts(dto),
+                userDetails.getUser().getId());
         return ResponseEntity.ok(toFullDto(updated));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteResume(@PathVariable Long id) {
-        resumeService.deleteResume(id);
+    public ResponseEntity<Void> deleteResume(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        resumeService.deleteResume(id, userDetails.getUser().getId());
         return ResponseEntity.noContent().build();
     }
 

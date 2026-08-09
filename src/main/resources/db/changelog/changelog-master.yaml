@@ -2,3 +2,4 @@ databaseChangeLog:
   - includeAll:
       path: migrations
       relativeToChangelogFile: true
+      endsWithFilter: .yaml

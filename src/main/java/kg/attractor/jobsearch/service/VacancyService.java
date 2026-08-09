@@ -10,9 +10,9 @@ public interface VacancyService {
 
     Vacancy createVacancy(Vacancy vacancy);
 
-    Vacancy updateVacancy(Long id, Vacancy vacancy);
+    Vacancy updateVacancy(Long id, Vacancy vacancy, Long currentUserId);
 
-    void deleteVacancy(Long id);
+    void deleteVacancy(Long id, Long currentUserId);
 
     Vacancy getVacancyById(Long id);
 
