@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/pages/profile")
@@ -37,6 +39,7 @@ public class ProfilePageController {
 
         model.addAttribute("profileDto", dto);
         model.addAttribute("accountType", current.getAccountType());
+        model.addAttribute("user", current);
         return "profile/edit";
     }
 
@@ -47,6 +50,7 @@ public class ProfilePageController {
                        Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("accountType", userDetails.getUser().getAccountType());
+            model.addAttribute("user", userDetails.getUser());
             return "profile/edit";
         }
 
@@ -55,5 +59,13 @@ public class ProfilePageController {
         userService.updateProfile(userId, updates, userId);
 
         return "redirect:/pages/cabinet";
+    }
+
+    @PostMapping("/avatar")
+    public String uploadAvatar(@RequestParam("avatar") MultipartFile file,
+                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUser().getId();
+        userService.uploadAvatar(userId, file, userId);
+        return "redirect:/pages/profile/edit";
     }
 }
