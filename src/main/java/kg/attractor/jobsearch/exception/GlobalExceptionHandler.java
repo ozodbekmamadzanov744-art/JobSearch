@@ -1,61 +1,54 @@
 package kg.attractor.jobsearch.exception;
 
-import kg.attractor.jobsearch.dto.ErrorResponseDto;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-
-@RestControllerAdvice
+@ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponseDto> handleNotFound(ResourceNotFoundException ex) {
-        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null);
+    public String handleNotFound(ResourceNotFoundException ex, HttpServletRequest request, Model model) {
+        return buildErrorPage(HttpStatus.NOT_FOUND, ex.getMessage(), request, model);
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponseDto> handleEmailExists(EmailAlreadyExistsException ex) {
-        return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), null);
+    public String handleEmailExists(EmailAlreadyExistsException ex, HttpServletRequest request, Model model) {
+        return buildErrorPage(HttpStatus.CONFLICT, ex.getMessage(), request, model);
     }
 
     @ExceptionHandler(DuplicateResponseException.class)
-    public ResponseEntity<ErrorResponseDto> handleDuplicateResponse(DuplicateResponseException ex) {
-        return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), null);
+    public String handleDuplicateResponse(DuplicateResponseException ex, HttpServletRequest request, Model model) {
+        return buildErrorPage(HttpStatus.CONFLICT, ex.getMessage(), request, model);
     }
 
     @ExceptionHandler(ForbiddenOperationException.class)
-    public ResponseEntity<ErrorResponseDto> handleForbidden(ForbiddenOperationException ex) {
-        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), null);
+    public String handleForbidden(ForbiddenOperationException ex, HttpServletRequest request, Model model) {
+        return buildErrorPage(HttpStatus.FORBIDDEN, ex.getMessage(), request, model);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponseDto> handleValidation(MethodArgumentNotValidException ex) {
-        Map<String, String> fieldErrors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                fieldErrors.put(error.getField(), error.getDefaultMessage()));
-
-        return buildResponse(HttpStatus.BAD_REQUEST, "Ошибка валидации входных данных", fieldErrors);
+    public String handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request, Model model) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .reduce((first, second) -> first + "; " + second)
+                .orElse("Ошибка валидации входных данных");
+        return buildErrorPage(HttpStatus.BAD_REQUEST, message, request, model);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleGeneral(Exception ex) {
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера", null);
+    public String handleGeneral(Exception ex, HttpServletRequest request, Model model) {
+        return buildErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера", request, model);
     }
 
-    private ResponseEntity<ErrorResponseDto> buildResponse(HttpStatus status, String message, Map<String, String> fieldErrors) {
-        ErrorResponseDto body = new ErrorResponseDto(
-                LocalDateTime.now(),
-                status.value(),
-                status.getReasonPhrase(),
-                message,
-                fieldErrors
-        );
-        return ResponseEntity.status(status).body(body);
+    private String buildErrorPage(HttpStatus status, String message, HttpServletRequest request, Model model) {
+        model.addAttribute("status", status.value());
+        model.addAttribute("reason", status.getReasonPhrase());
+        model.addAttribute("message", message);
+        model.addAttribute("details", request);
+        return "errors/error";
     }
 }

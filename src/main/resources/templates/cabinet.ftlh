@@ -14,7 +14,10 @@
     </div>
 
     <#if user.accountType == "APPLICANT">
-        <h3 class="mb-3">Мои резюме</h3>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0">Мои резюме</h3>
+            <a href="/pages/resumes/create" class="btn btn-success btn-sm">+ Создать резюме</a>
+        </div>
         <#if resumes?size == 0>
             <p class="text-muted">Резюме пока не созданы.</p>
         </#if>
@@ -22,13 +25,17 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-title">${resume.name}</h5>
-                    <p class="card-text text-muted">Обновлено: ${resume.updateTime?string("dd.MM.yyyy")}</p>
+                    <p class="card-text text-muted">Обновлено: ${resume.updateTime!''}</p>
+                    <a href="/pages/resumes/${resume.id}/edit" class="btn btn-sm btn-outline-primary">Редактировать</a>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteResume(${resume.id})">Удалить</button>
                 </div>
             </div>
         </#list>
     <#else>
-        <h3 class="mb-3">Мои вакансии</h3>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0">Мои вакансии</h3>
+            <a href="/pages/vacancies/create" class="btn btn-success btn-sm">+ Создать вакансию</a>
+        </div>
         <#if vacancies?size == 0>
             <p class="text-muted">Вакансии пока не созданы.</p>
         </#if>
@@ -36,7 +43,9 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-title">${vacancy.name}</h5>
-                    <p class="card-text text-muted">Обновлено: ${vacancy.updateTime?string("dd.MM.yyyy")}</p>
+                    <p class="card-text text-muted">Обновлено: ${vacancy.updateTime!''}</p>
+                    <a href="/pages/vacancies/${vacancy.id}/edit" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                    <a href="/pages/vacancies/${vacancy.id}/applicants" class="btn btn-sm btn-outline-secondary">Отклики</a>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteVacancy(${vacancy.id})">Удалить</button>
                 </div>
             </div>
