@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/registration").permitAll()
                         .requestMatchers(HttpMethod.GET, "/vacancies/**").permitAll()
 
@@ -40,12 +41,25 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/vacancies").hasRole("EMPLOYER")
                         .requestMatchers(HttpMethod.PUT, "/vacancies/**").hasRole("EMPLOYER")
                         .requestMatchers(HttpMethod.DELETE, "/vacancies/**").hasRole("EMPLOYER")
+                        .requestMatchers("/pages/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/pages/vacancies").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/pages/resumes").hasRole("EMPLOYER")
 
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)
                 .httpBasic(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .formLogin(form -> form
+                        .loginPage("/pages/auth/login")
+                        .loginProcessingUrl("/pages/auth/login")
+                        .defaultSuccessUrl("/pages/cabinet", true)
+                        .failureUrl("/pages/auth/login?error=true")
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/pages/vacancies")
+                        .permitAll())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
         return http.build();
     }
