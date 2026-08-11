@@ -8,6 +8,8 @@ spring:
     password: 2006
   liquibase:
     change-log: classpath:db/changelog/changelog-master.yaml
+  freemarker:
+    expose-session-attributes: true
   h2:
     console:
       enabled: true
@@ -15,4 +17,3 @@ spring:
 
 server:
   port: 8090
-
