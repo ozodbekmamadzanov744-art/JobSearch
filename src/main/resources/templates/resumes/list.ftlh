@@ -1,8 +1,8 @@
 <#import "../layout.ftlh" as layout>
 <@layout.layout title="Резюме">
-    <h2 class="mb-4">Резюме соискателей</h2>
+    <h2 class="mb-4">${pageTitle!"Резюме соискателей"}</h2>
     <#if resumes?size == 0>
-        <p class="text-muted">Резюме пока не опубликованы.</p>
+        <p class="text-muted">${emptyMessage!"Резюме пока не опубликованы."}</p>
     </#if>
     <#list resumes as resume>
         <div class="card mb-3">
