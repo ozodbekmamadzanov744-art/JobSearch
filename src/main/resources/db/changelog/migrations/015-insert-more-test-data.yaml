@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 015-insert-more-test-data
+      author: student
+      changes:
+        - sqlFile:
+            path: data2.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true
