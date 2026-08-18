@@ -1,8 +1,8 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.CategoryDao;
 import kg.attractor.jobsearch.exception.ResourceNotFoundException;
 import kg.attractor.jobsearch.model.Category;
+import kg.attractor.jobsearch.repository.CategoryRepository;
 import kg.attractor.jobsearch.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,16 +13,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
-    private final CategoryDao categoryDao;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public List<Category> getAllCategories() {
-        return categoryDao.findAll();
+        return categoryRepository.findAll();
     }
 
     @Override
     public Category getCategoryById(Long id) {
-        return categoryDao.findById(id)
+        return categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Категория с id " + id + " не найдена"));
     }
 }
