@@ -14,4 +14,8 @@
             </div>
         </div>
     </#list>
+
+    <#if resumePage??>
+        <@layout.pagination pageObj=resumePage baseUrl="/pages/resumes" extra=""/>
+    </#if>
 </@layout.layout>

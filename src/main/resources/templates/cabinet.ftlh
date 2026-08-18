@@ -31,10 +31,22 @@
                 </div>
             </div>
         </#list>
+        <#if resumePage??>
+            <@layout.pagination pageObj=resumePage baseUrl="/pages/cabinet" extra=""/>
+        </#if>
     <#else>
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
             <h3 class="mb-0">Мои вакансии</h3>
-            <a href="/pages/vacancies/create" class="btn btn-success btn-sm">+ Создать вакансию</a>
+            <div class="d-flex align-items-center gap-2">
+                <form method="get" class="d-flex align-items-center gap-2">
+                    <label class="form-label mb-0 text-nowrap">Сортировка:</label>
+                    <select name="sort" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
+                        <option value="date" <#if currentSort == "date">selected</#if>>По дате публикации</option>
+                        <option value="responses" <#if currentSort == "responses">selected</#if>>По количеству откликов</option>
+                    </select>
+                </form>
+                <a href="/pages/vacancies/create" class="btn btn-success btn-sm">+ Создать вакансию</a>
+            </div>
         </div>
         <#if vacancies?size == 0>
             <p class="text-muted">Вакансии пока не созданы.</p>
@@ -50,6 +62,9 @@
                 </div>
             </div>
         </#list>
+        <#if vacancyPage??>
+            <@layout.pagination pageObj=vacancyPage baseUrl="/pages/cabinet" extra="&sort=${currentSort}"/>
+        </#if>
     </#if>
 
     <script>

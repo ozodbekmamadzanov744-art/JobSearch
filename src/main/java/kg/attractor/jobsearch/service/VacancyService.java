@@ -3,6 +3,7 @@ package kg.attractor.jobsearch.service;
 import kg.attractor.jobsearch.model.RespondedApplicant;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.Vacancy;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -27,4 +28,9 @@ public interface VacancyService {
     List<User> getApplicantsForVacancy(Long vacancyId);
 
     List<Vacancy> getVacanciesByApplicant(Long applicantId);
+
+
+    Page<Vacancy> getActiveVacancies(int page, int size, String sortBy);
+
+    Page<Vacancy> getVacanciesByAuthor(Long authorId, int page, int size, String sortBy);
 }

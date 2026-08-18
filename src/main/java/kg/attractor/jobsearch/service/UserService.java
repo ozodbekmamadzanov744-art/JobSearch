@@ -1,6 +1,7 @@
 package kg.attractor.jobsearch.service;
 
 import kg.attractor.jobsearch.model.User;
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -22,5 +23,6 @@ public interface UserService {
 
     User updateProfile(Long id, User updates, Long currentUserId);
 
+    Page<User> getEmployers(int page, int size);
 
 }

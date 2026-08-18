@@ -21,6 +21,8 @@
                     <li class="nav-item"><a class="nav-link" href="/pages/vacancies">Вакансии</a></li>
                     <#if known && currentUser.user.accountType == "EMPLOYER">
                         <li class="nav-item"><a class="nav-link" href="/pages/resumes">Резюме</a></li>
+                    <#elseif known && currentUser.user.accountType == "APPLICANT">
+                        <li class="nav-item"><a class="nav-link" href="/pages/companies">Компании</a></li>
                     </#if>
                 </ul>
             </div>
@@ -40,4 +42,25 @@
     </div>
     </body>
     </html>
+</#macro>
+
+<#-- Универсальная постраничная навигация для org.springframework.data.domain.Page -->
+<#macro pagination pageObj baseUrl extra="">
+    <#if pageObj.totalPages gt 1>
+        <nav aria-label="Постраничная навигация" class="mt-3">
+            <ul class="pagination">
+                <li class="page-item <#if pageObj.first>disabled</#if>">
+                    <a class="page-link" href="${baseUrl}?page=${pageObj.number - 1}${extra}">&laquo; Назад</a>
+                </li>
+                <#list 0..<pageObj.totalPages as i>
+                    <li class="page-item <#if i == pageObj.number>active</#if>">
+                        <a class="page-link" href="${baseUrl}?page=${i}${extra}">${i + 1}</a>
+                    </li>
+                </#list>
+                <li class="page-item <#if pageObj.last>disabled</#if>">
+                    <a class="page-link" href="${baseUrl}?page=${pageObj.number + 1}${extra}">Вперёд &raquo;</a>
+                </li>
+            </ul>
+        </nav>
+    </#if>
 </#macro>

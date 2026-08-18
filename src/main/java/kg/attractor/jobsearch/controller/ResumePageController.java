@@ -15,6 +15,7 @@ import kg.attractor.jobsearch.security.CustomUserDetails;
 import kg.attractor.jobsearch.service.CategoryService;
 import kg.attractor.jobsearch.service.ContactTypeService;
 import kg.attractor.jobsearch.service.ResumeService;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -49,9 +51,13 @@ public class ResumePageController {
         this.contactTypeService = contactTypeService;
     }
 
+    private static final int DEFAULT_PAGE_SIZE = 5;
+
     @GetMapping
-    public String resumes(Model model) {
-        model.addAttribute("resumes", resumeService.getAllActiveResumes());
+    public String resumes(Model model, @RequestParam(defaultValue = "0") int page) {
+        Page<Resume> resumePage = resumeService.getAllActiveResumes(page, DEFAULT_PAGE_SIZE);
+        model.addAttribute("resumePage", resumePage);
+        model.addAttribute("resumes", resumePage.getContent());
         return "resumes/list";
     }
 

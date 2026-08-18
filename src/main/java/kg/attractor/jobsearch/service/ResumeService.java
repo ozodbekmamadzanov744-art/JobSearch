@@ -4,6 +4,7 @@ import kg.attractor.jobsearch.model.ContactInfo;
 import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -30,4 +31,8 @@ public interface ResumeService {
     List<WorkExperienceInfo> getWorkExperienceByResumeId(Long resumeId);
 
     List<ContactInfo> getContactsByResumeId(Long resumeId);
+
+    Page<Resume> getAllActiveResumes(int page, int size);
+
+    Page<Resume> getResumesByApplicant(Long applicantId, int page, int size);
 }

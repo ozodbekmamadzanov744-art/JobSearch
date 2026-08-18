@@ -8,6 +8,7 @@ import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.Vacancy;
 import kg.attractor.jobsearch.security.CustomUserDetails;
 import kg.attractor.jobsearch.service.*;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,11 +46,19 @@ public class VacancyPageController {
         this.userService = userService;
     }
 
+    private static final int DEFAULT_PAGE_SIZE = 5;
+
     @GetMapping
     public String vacancies(Model model,
+                            @RequestParam(defaultValue = "0") int page,
+                            @RequestParam(defaultValue = "date") String sort,
                             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        model.addAttribute("vacancies", vacancyService.getAllActiveVacancies());
+        Page<Vacancy> vacancyPage = vacancyService.getActiveVacancies(page, DEFAULT_PAGE_SIZE, sort);
+
+        model.addAttribute("vacancyPage", vacancyPage);
+        model.addAttribute("vacancies", vacancyPage.getContent());
+        model.addAttribute("currentSort", sort);
 
         if (userDetails != null) {
             var user = userService.getUserById(userDetails.getUser().getId());
