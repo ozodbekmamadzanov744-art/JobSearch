@@ -1,18 +1,22 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.ResumeDao;
 import kg.attractor.jobsearch.exception.ForbiddenOperationException;
 import kg.attractor.jobsearch.exception.ResourceNotFoundException;
 import kg.attractor.jobsearch.model.ContactInfo;
 import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
+import kg.attractor.jobsearch.repository.ResumeRepository;
 import kg.attractor.jobsearch.service.ContactInfoService;
 import kg.attractor.jobsearch.service.EducationInfoService;
 import kg.attractor.jobsearch.service.ResumeService;
 import kg.attractor.jobsearch.service.WorkExperienceInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +26,7 @@ import java.util.List;
 @Slf4j
 public class ResumeServiceImpl implements ResumeService {
 
-    private final ResumeDao resumeDao;
+    private final ResumeRepository resumeRepository;
     private final EducationInfoService educationInfoService;
     private final WorkExperienceInfoService workExperienceInfoService;
     private final ContactInfoService contactInfoService;
@@ -35,7 +39,7 @@ public class ResumeServiceImpl implements ResumeService {
             resume.setIsActive(true);
         }
 
-        Resume saved = resumeDao.save(resume);
+        Resume saved = resumeRepository.save(resume);
 
         saveEducation(saved.getId(), educationList);
         saveWorkExperience(saved.getId(), workExperienceList);
@@ -54,9 +58,11 @@ public class ResumeServiceImpl implements ResumeService {
             throw new ForbiddenOperationException("Вы не являетесь владельцем этого резюме");
         }
 
-        resume.setId(existing.getId());
-        resume.setApplicantId(existing.getApplicantId());
-        resumeDao.update(resume);
+        existing.setName(resume.getName());
+        existing.setCategoryId(resume.getCategoryId());
+        existing.setSalary(resume.getSalary());
+        existing.setIsActive(resume.getIsActive());
+        resumeRepository.save(existing);
 
         educationInfoService.deleteByResumeId(id);
         saveEducation(id, educationList);
@@ -67,7 +73,7 @@ public class ResumeServiceImpl implements ResumeService {
         contactInfoService.deleteByResumeId(id);
         saveContacts(id, contactList);
 
-        return resume;
+        return existing;
     }
 
     @Override
@@ -81,32 +87,30 @@ public class ResumeServiceImpl implements ResumeService {
         educationInfoService.deleteByResumeId(id);
         workExperienceInfoService.deleteByResumeId(id);
         contactInfoService.deleteByResumeId(id);
-        resumeDao.delete(id);
+        resumeRepository.deleteById(id);
     }
 
     @Override
     public Resume getResumeById(Long id) {
-        return resumeDao.findById(id)
+        return resumeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Резюме с id " + id + " не найдено"));
     }
 
     @Override
     public List<Resume> getAllActiveResumes() {
-        return resumeDao.findAll().stream()
-                .filter(resume -> Boolean.TRUE.equals(resume.getIsActive()))
-                .toList();
+        return resumeRepository.findByIsActiveTrue(Pageable.unpaged()).getContent();
     }
 
     @Override
     public List<Resume> getResumesByCategory(Long categoryId) {
-        return resumeDao.findByCategoryId(categoryId).stream()
+        return resumeRepository.findByCategoryId(categoryId).stream()
                 .filter(resume -> Boolean.TRUE.equals(resume.getIsActive()))
                 .toList();
     }
 
     @Override
     public List<Resume> getResumesByApplicant(Long applicantId) {
-        return resumeDao.findByApplicantId(applicantId);
+        return resumeRepository.findByApplicantId(applicantId, Pageable.unpaged()).getContent();
     }
 
     @Override
@@ -122,6 +126,18 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public List<ContactInfo> getContactsByResumeId(Long resumeId) {
         return contactInfoService.findByResumeId(resumeId);
+    }
+
+    @Override
+    public Page<Resume> getAllActiveResumes(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updateTime"));
+        return resumeRepository.findByIsActiveTrue(pageable);
+    }
+
+    @Override
+    public Page<Resume> getResumesByApplicant(Long applicantId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updateTime"));
+        return resumeRepository.findByApplicantId(applicantId, pageable);
     }
 
     private void saveEducation(Long resumeId, List<EducationInfo> educationList) {

@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/vacancies/**").hasRole("EMPLOYER")
                         .requestMatchers("/pages/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/pages/vacancies").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/pages/companies").hasRole("APPLICANT")
                         .requestMatchers(HttpMethod.GET, "/pages/resumes").hasRole("EMPLOYER")
                         .requestMatchers(HttpMethod.GET, "/pages/resumes/create").hasRole("APPLICANT")
                         .requestMatchers(HttpMethod.POST, "/pages/resumes/create").hasRole("APPLICANT")

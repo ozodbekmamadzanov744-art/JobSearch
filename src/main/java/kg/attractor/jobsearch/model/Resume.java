@@ -47,4 +47,16 @@ public class Resume {
 
     @Column(name = "update_time")
     private LocalDateTime updateTime;
+
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        createdDate = now;
+        updateTime = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updateTime = LocalDateTime.now();
+    }
 }

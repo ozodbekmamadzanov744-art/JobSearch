@@ -1,18 +1,21 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.UserDao;
 import kg.attractor.jobsearch.exception.EmailAlreadyExistsException;
 import kg.attractor.jobsearch.exception.ForbiddenOperationException;
 import kg.attractor.jobsearch.exception.ResourceNotFoundException;
 import kg.attractor.jobsearch.model.Role;
 import kg.attractor.jobsearch.model.User;
+import kg.attractor.jobsearch.repository.UserRepository;
 import kg.attractor.jobsearch.service.RoleService;
 import kg.attractor.jobsearch.service.UserRoleService;
 import kg.attractor.jobsearch.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -26,12 +29,13 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private static final String DEFAULT_AVATAR = "/images/default-avatar.png";
     private static final String UPLOAD_DIR = "uploads/avatars";
 
-    private final UserDao userDao;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
     private final UserRoleService userRoleService;
@@ -53,7 +57,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         String requestedRole = user.getAccountType();
-        User saved = userDao.save(user);
+        User saved = userRepository.save(user);
 
         Role role = roleService.getRoleByName(requestedRole);
         userRoleService.assignRole(saved.getId(), role.getId());
@@ -65,25 +69,33 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(Long id) {
-        return userDao.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id " + id + " не найден"));
+        populateAccountType(user);
+        return user;
     }
 
     @Override
     public List<User> findByName(String name) {
-        return userDao.findByName(name);
+        List<User> users = userRepository.findByName(name);
+        users.forEach(this::populateAccountType);
+        return users;
     }
 
     @Override
     public User findByPhoneNumber(String phoneNumber) {
-        return userDao.findByPhoneNumber(phoneNumber)
+        User user = userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь с телефоном " + phoneNumber + " не найден"));
+        populateAccountType(user);
+        return user;
     }
 
     @Override
     public User findByEmail(String email) {
-        return userDao.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь с email " + email + " не найден"));
+        populateAccountType(user);
+        return user;
     }
 
     @Override
@@ -97,7 +109,7 @@ public class UserServiceImpl implements UserService {
 
         if (file == null || file.isEmpty()) {
             user.setAvatar(DEFAULT_AVATAR);
-            userDao.update(user);
+            userRepository.save(user);
             return;
         }
 
@@ -114,7 +126,7 @@ public class UserServiceImpl implements UserService {
             Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
             user.setAvatar("/" + UPLOAD_DIR + "/" + fileName);
-            userDao.update(user);
+            userRepository.save(user);
             log.info("Аватар пользователя id={} обновлён: {}", id, user.getAvatar());
         } catch (IOException e) {
             log.error("Ошибка при сохранении файла аватара для пользователя id={}", id, e);
@@ -131,7 +143,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean existsByEmail(String email) {
-        return userDao.existsByEmail(email);
+        return userRepository.existsByEmail(email);
     }
 
     @Override
@@ -146,7 +158,20 @@ public class UserServiceImpl implements UserService {
         existing.setSurname(updates.getSurname());
         existing.setAge(updates.getAge());
         existing.setPhoneNumber(updates.getPhoneNumber());
-        userDao.update(existing);
+        userRepository.save(existing);
         return existing;
+    }
+
+    @Override
+    public Page<User> getEmployers(int page, int size) {
+        Page<User> employers = userRepository.findByRoles_Name("EMPLOYER", PageRequest.of(page, size));
+        employers.forEach(this::populateAccountType);
+        return employers;
+    }
+
+    private void populateAccountType(User user) {
+        user.getRoles().stream()
+                .findFirst()
+                .ifPresent(role -> user.setAccountType(role.getName()));
     }
 }

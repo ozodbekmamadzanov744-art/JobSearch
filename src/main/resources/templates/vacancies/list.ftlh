@@ -1,9 +1,20 @@
 <#import "../layout.ftlh" as layout>
 <@layout.layout title="Вакансии">
-    <h2 class="mb-4">Актуальные вакансии</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2 class="mb-0">Актуальные вакансии</h2>
+        <form method="get" class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0 text-nowrap">Сортировка:</label>
+            <select name="sort" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
+                <option value="date" <#if currentSort == "date">selected</#if>>По дате публикации</option>
+                <option value="responses" <#if currentSort == "responses">selected</#if>>По количеству откликов</option>
+            </select>
+        </form>
+    </div>
+
     <#if vacancies?size == 0>
         <p class="text-muted">Вакансий пока нет.</p>
     </#if>
+
     <#list vacancies as vacancy>
         <div class="card mb-3">
             <div class="card-body">
@@ -29,4 +40,8 @@
             </div>
         </div>
     </#list>
+
+    <#if vacancyPage??>
+        <@layout.pagination pageObj=vacancyPage baseUrl="/pages/vacancies" extra="&sort=${currentSort}"/>
+    </#if>
 </@layout.layout>

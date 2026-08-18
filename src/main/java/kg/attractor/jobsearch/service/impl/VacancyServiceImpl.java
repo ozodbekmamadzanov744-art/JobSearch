@@ -1,18 +1,22 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.VacancyDao;
 import kg.attractor.jobsearch.exception.ForbiddenOperationException;
 import kg.attractor.jobsearch.exception.ResourceNotFoundException;
 import kg.attractor.jobsearch.model.RespondedApplicant;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.Vacancy;
+import kg.attractor.jobsearch.repository.VacancyRepository;
 import kg.attractor.jobsearch.service.RespondedApplicantService;
 import kg.attractor.jobsearch.service.ResumeService;
 import kg.attractor.jobsearch.service.UserService;
 import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +26,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VacancyServiceImpl implements VacancyService {
 
-    private final VacancyDao vacancyDao;
+    private static final String SORT_BY_RESPONSES = "responses";
+
+    private final VacancyRepository vacancyRepository;
     private final RespondedApplicantService respondedApplicantService;
     private final ResumeService resumeService;
     private final UserService userService;
@@ -33,7 +39,7 @@ public class VacancyServiceImpl implements VacancyService {
         if (vacancy.getIsActive() == null) {
             vacancy.setIsActive(true);
         }
-        return vacancyDao.save(vacancy);
+        return vacancyRepository.save(vacancy);
     }
 
     @Override
@@ -44,10 +50,15 @@ public class VacancyServiceImpl implements VacancyService {
             throw new ForbiddenOperationException("Вы не являетесь автором этой вакансии");
         }
 
-        vacancy.setId(existing.getId());
-        vacancy.setAuthorId(existing.getAuthorId());
-        vacancyDao.update(vacancy);
-        return vacancy;
+        existing.setName(vacancy.getName());
+        existing.setDescription(vacancy.getDescription());
+        existing.setCategoryId(vacancy.getCategoryId());
+        existing.setSalary(vacancy.getSalary());
+        existing.setExpFrom(vacancy.getExpFrom());
+        existing.setExpTo(vacancy.getExpTo());
+        existing.setIsActive(vacancy.getIsActive());
+
+        return vacancyRepository.save(existing);
     }
 
     @Override
@@ -58,32 +69,30 @@ public class VacancyServiceImpl implements VacancyService {
             throw new ForbiddenOperationException("Вы не являетесь автором этой вакансии");
         }
 
-        vacancyDao.delete(id);
+        vacancyRepository.deleteById(id);
     }
 
     @Override
     public Vacancy getVacancyById(Long id) {
-        return vacancyDao.findById(id)
+        return vacancyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Вакансия с id " + id + " не найдена"));
     }
 
     @Override
     public List<Vacancy> getAllActiveVacancies() {
-        return vacancyDao.findAll().stream()
-                .filter(vacancy -> Boolean.TRUE.equals(vacancy.getIsActive()))
-                .toList();
+        return vacancyRepository.findByIsActiveTrue(Pageable.unpaged()).getContent();
     }
 
     @Override
     public List<Vacancy> getVacanciesByCategory(Long categoryId) {
-        return vacancyDao.findByCategoryId(categoryId).stream()
+        return vacancyRepository.findByCategoryId(categoryId).stream()
                 .filter(vacancy -> Boolean.TRUE.equals(vacancy.getIsActive()))
                 .toList();
     }
 
     @Override
     public List<Vacancy> getVacanciesByAuthor(Long authorId) {
-        return vacancyDao.findByAuthorId(authorId);
+        return vacancyRepository.findByAuthorId(authorId, Pageable.unpaged()).getContent();
     }
 
     @Override
@@ -112,5 +121,23 @@ public class VacancyServiceImpl implements VacancyService {
                 .distinct()
                 .map(this::getVacancyById)
                 .toList();
+    }
+
+    @Override
+    public Page<Vacancy> getActiveVacancies(int page, int size, String sortBy) {
+        if (SORT_BY_RESPONSES.equals(sortBy)) {
+            return vacancyRepository.findActiveOrderByResponseCountDesc(PageRequest.of(page, size));
+        }
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        return vacancyRepository.findByIsActiveTrue(pageable);
+    }
+
+    @Override
+    public Page<Vacancy> getVacanciesByAuthor(Long authorId, int page, int size, String sortBy) {
+        if (SORT_BY_RESPONSES.equals(sortBy)) {
+            return vacancyRepository.findByAuthorIdOrderByResponseCountDesc(authorId, PageRequest.of(page, size));
+        }
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        return vacancyRepository.findByAuthorId(authorId, pageable);
     }
 }

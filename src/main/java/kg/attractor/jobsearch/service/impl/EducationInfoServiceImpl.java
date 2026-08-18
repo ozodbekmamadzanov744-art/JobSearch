@@ -1,7 +1,7 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.EducationInfoDao;
 import kg.attractor.jobsearch.model.EducationInfo;
+import kg.attractor.jobsearch.repository.EducationInfoRepository;
 import kg.attractor.jobsearch.service.EducationInfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,20 +12,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EducationInfoServiceImpl implements EducationInfoService {
 
-    private final EducationInfoDao educationInfoDao;
+    private final EducationInfoRepository educationInfoRepository;
 
     @Override
     public EducationInfo save(EducationInfo educationInfo) {
-        return educationInfoDao.save(educationInfo);
+        return educationInfoRepository.save(educationInfo);
     }
 
     @Override
     public List<EducationInfo> findByResumeId(Long resumeId) {
-        return educationInfoDao.findByResumeId(resumeId);
+        return educationInfoRepository.findByResumeId(resumeId);
     }
 
     @Override
     public void deleteByResumeId(Long resumeId) {
-        educationInfoDao.deleteByResumeId(resumeId);
+        educationInfoRepository.deleteByResumeId(resumeId);
     }
 }
