@@ -28,6 +28,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/errors/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/registration").permitAll()
                         .requestMatchers(HttpMethod.GET, "/vacancies/**").permitAll()
 

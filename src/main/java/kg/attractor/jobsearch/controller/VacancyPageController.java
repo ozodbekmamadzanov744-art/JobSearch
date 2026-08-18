@@ -7,10 +7,7 @@ import kg.attractor.jobsearch.model.RespondedApplicant;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.Vacancy;
 import kg.attractor.jobsearch.security.CustomUserDetails;
-import kg.attractor.jobsearch.service.CategoryService;
-import kg.attractor.jobsearch.service.RespondedApplicantService;
-import kg.attractor.jobsearch.service.ResumeService;
-import kg.attractor.jobsearch.service.VacancyService;
+import kg.attractor.jobsearch.service.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,19 +31,47 @@ public class VacancyPageController {
     private final CategoryService categoryService;
     private final RespondedApplicantService respondedApplicantService;
     private final ResumeService resumeService;
+    private final UserService userService;
 
-    public VacancyPageController(VacancyService vacancyService, CategoryService categoryService,
-                                 RespondedApplicantService respondedApplicantService, ResumeService resumeService) {
+    public VacancyPageController(VacancyService vacancyService,
+                                 CategoryService categoryService,
+                                 RespondedApplicantService respondedApplicantService,
+                                 ResumeService resumeService,
+                                 UserService userService) {
         this.vacancyService = vacancyService;
         this.categoryService = categoryService;
         this.respondedApplicantService = respondedApplicantService;
         this.resumeService = resumeService;
+        this.userService = userService;
+    }
+
+    @GetMapping
+    public String vacancies(Model model,
+                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        model.addAttribute("vacancies", vacancyService.getAllActiveVacancies());
+
+        if (userDetails != null) {
+            var user = userService.getUserById(userDetails.getUser().getId());
+
+            model.addAttribute("currentUser", user);
+
+            if ("APPLICANT".equals(user.getAccountType())) {
+                model.addAttribute(
+                        "applicantResumes",
+                        resumeService.getResumesByApplicant(user.getId())
+                );
+            }
+        }
+
+        return "vacancies/list";
     }
 
     @GetMapping("/create")
     public String createForm(Model model) {
         model.addAttribute("vacancyDto", new VacancyFormDto());
         addReferenceData(model);
+
         return "vacancies/form";
     }
 
@@ -55,6 +80,19 @@ public class VacancyPageController {
                          BindingResult bindingResult,
                          @AuthenticationPrincipal CustomUserDetails userDetails,
                          Model model) {
+
+        // Проверяем, что опыт "от" не больше опыта "до"
+        if (dto.getExpFrom() != null
+                && dto.getExpTo() != null
+                && dto.getExpFrom() > dto.getExpTo()) {
+
+            bindingResult.rejectValue(
+                    "expFrom",
+                    "expFrom.invalid",
+                    "Опыт от не может быть больше чем опыт до"
+            );
+        }
+
         if (bindingResult.hasErrors()) {
             addReferenceData(model);
             return "vacancies/form";
@@ -69,13 +107,20 @@ public class VacancyPageController {
     }
 
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public String editForm(@PathVariable Long id,
+                           Model model,
+                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+
         Vacancy vacancy = vacancyService.getVacancyById(id);
+
         if (!vacancy.getAuthorId().equals(userDetails.getUser().getId())) {
-            throw new ForbiddenOperationException("Вы не являетесь автором этой вакансии");
+            throw new ForbiddenOperationException(
+                    "Вы не являетесь автором этой вакансии"
+            );
         }
 
         VacancyFormDto dto = new VacancyFormDto();
+
         dto.setName(vacancy.getName());
         dto.setDescription(vacancy.getDescription());
         dto.setCategoryId(vacancy.getCategoryId());
@@ -86,7 +131,9 @@ public class VacancyPageController {
 
         model.addAttribute("vacancyDto", dto);
         model.addAttribute("vacancyId", id);
+
         addReferenceData(model);
+
         return "vacancies/form";
     }
 
@@ -96,14 +143,33 @@ public class VacancyPageController {
                        BindingResult bindingResult,
                        @AuthenticationPrincipal CustomUserDetails userDetails,
                        Model model) {
+
+        // Проверяем, что опыт "от" не больше опыта "до"
+        if (dto.getExpFrom() != null
+                && dto.getExpTo() != null
+                && dto.getExpFrom() > dto.getExpTo()) {
+
+            bindingResult.rejectValue(
+                    "expFrom",
+                    "expFrom.invalid",
+                    "Опыт от не может быть больше чем опыт до"
+            );
+        }
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("vacancyId", id);
             addReferenceData(model);
+
             return "vacancies/form";
         }
 
         Vacancy vacancy = toModel(dto);
-        vacancyService.updateVacancy(id, vacancy, userDetails.getUser().getId());
+
+        vacancyService.updateVacancy(
+                id,
+                vacancy,
+                userDetails.getUser().getId()
+        );
 
         return "redirect:/pages/cabinet";
     }
@@ -112,13 +178,19 @@ public class VacancyPageController {
     public String respond(@PathVariable Long id,
                           @RequestParam Long resumeId,
                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+
         Resume resume = resumeService.getResumeById(resumeId);
+
         if (!resume.getApplicantId().equals(userDetails.getUser().getId())) {
-            throw new ForbiddenOperationException("Нельзя откликнуться чужим резюме");
+            throw new ForbiddenOperationException(
+                    "Нельзя откликнуться чужим резюме"
+            );
         }
 
         RespondedApplicant response = new RespondedApplicant();
+
         response.setResumeId(resumeId);
+
         vacancyService.respondToVacancy(id, response);
 
         return "redirect:/pages/vacancies";
@@ -126,37 +198,63 @@ public class VacancyPageController {
 
     private void addReferenceData(Model model) {
         Map<String, String> categories = new LinkedHashMap<>();
-        categoryService.getAllCategories().forEach(c -> categories.put(String.valueOf(c.getId()), c.getName()));
+
+        categoryService.getAllCategories().forEach(
+                category -> categories.put(
+                        String.valueOf(category.getId()),
+                        category.getName()
+                )
+        );
+
         model.addAttribute("categories", categories);
     }
 
     private Vacancy toModel(VacancyFormDto dto) {
         Vacancy vacancy = new Vacancy();
+
         vacancy.setName(dto.getName());
         vacancy.setDescription(dto.getDescription());
         vacancy.setCategoryId(dto.getCategoryId());
         vacancy.setSalary(dto.getSalary());
         vacancy.setExpFrom(dto.getExpFrom());
         vacancy.setExpTo(dto.getExpTo());
-        vacancy.setIsActive(dto.getIsActive() == null || dto.getIsActive());
+        vacancy.setIsActive(
+                dto.getIsActive() == null || dto.getIsActive()
+        );
+
         return vacancy;
     }
 
     @GetMapping("/{id}/applicants")
-    public String applicants(@PathVariable Long id, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public String applicants(@PathVariable Long id,
+                             Model model,
+                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+
         Vacancy vacancy = vacancyService.getVacancyById(id);
+
         if (!vacancy.getAuthorId().equals(userDetails.getUser().getId())) {
-            throw new ForbiddenOperationException("Вы не являетесь автором этой вакансии");
+            throw new ForbiddenOperationException(
+                    "Вы не являетесь автором этой вакансии"
+            );
         }
 
-        List<Resume> resumes = respondedApplicantService.findByVacancyId(id).stream()
+        List<Resume> resumes = respondedApplicantService
+                .findByVacancyId(id)
+                .stream()
                 .map(RespondedApplicant::getResumeId)
                 .map(resumeService::getResumeById)
                 .toList();
 
         model.addAttribute("resumes", resumes);
-        model.addAttribute("pageTitle", "Отклики на вакансию: " + vacancy.getName());
-        model.addAttribute("emptyMessage", "Пока никто не откликнулся на эту вакансию.");
+        model.addAttribute(
+                "pageTitle",
+                "Отклики на вакансию: " + vacancy.getName()
+        );
+        model.addAttribute(
+                "emptyMessage",
+                "Пока никто не откликнулся на эту вакансию."
+        );
+
         return "resumes/list";
     }
 }

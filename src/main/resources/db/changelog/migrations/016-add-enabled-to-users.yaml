@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 016-add-enabled-to-users
+      author: Ozodbek Mamadjanov
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: enabled
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
