@@ -40,6 +40,9 @@ public class User {
     @Column(length = 500)
     private String avatar;
 
+    @Column(nullable = false)
+    private Boolean enabled = true;
+
     @Transient
     private String accountType;
 

@@ -29,8 +29,8 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User save(User user) {
-        String sql = "INSERT INTO users (name, surname, age, email, password, phone_number, avatar) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (name, surname, age, email, password, phone_number, avatar, enabled) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -46,6 +46,7 @@ public class UserDaoImpl implements UserDao {
             statement.setString(5, user.getPassword());
             statement.setString(6, user.getPhoneNumber());
             statement.setString(7, user.getAvatar());
+            statement.setBoolean(8, user.getEnabled() == null || user.getEnabled());
 
             statement.executeUpdate();
 
@@ -152,6 +153,7 @@ public class UserDaoImpl implements UserDao {
         user.setPassword(resultSet.getString("password"));
         user.setPhoneNumber(resultSet.getString("phone_number"));
         user.setAvatar(resultSet.getString("avatar"));
+        user.setEnabled(resultSet.getBoolean("enabled"));
         user.setAccountType(resultSet.getString("role_name"));
         return user;
     }

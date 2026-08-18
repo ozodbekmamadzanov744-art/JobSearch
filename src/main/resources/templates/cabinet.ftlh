@@ -25,7 +25,7 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-title">${resume.name}</h5>
-                    <p class="card-text text-muted">Обновлено: ${resume.updateTime!''}</p>
+                    <p class="card-text text-muted">Обновлено: <#if resume.updateTime??>${resume.updateTime.toString()?substring(0,10)}<#else>—</#if></p>
                     <a href="/pages/resumes/${resume.id}/edit" class="btn btn-sm btn-outline-primary">Редактировать</a>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteResume(${resume.id})">Удалить</button>
                 </div>
@@ -43,7 +43,7 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-title">${vacancy.name}</h5>
-                    <p class="card-text text-muted">Обновлено: ${vacancy.updateTime!''}</p>
+                    <p class="card-text text-muted">Обновлено: <#if vacancy.updateTime??>${vacancy.updateTime.toString()?substring(0,10)}<#else>—</#if></p>
                     <a href="/pages/vacancies/${vacancy.id}/edit" class="btn btn-sm btn-outline-primary">Редактировать</a>
                     <a href="/pages/vacancies/${vacancy.id}/applicants" class="btn btn-sm btn-outline-secondary">Отклики</a>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteVacancy(${vacancy.id})">Удалить</button>

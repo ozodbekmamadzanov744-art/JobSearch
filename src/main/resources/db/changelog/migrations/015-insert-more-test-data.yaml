@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: 015-insert-more-test-data
-      author: student
+      author: Ozodbek Mamadjanov
       changes:
         - sqlFile:
             path: data2.sql

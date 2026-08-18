@@ -41,22 +41,31 @@ public class ResumePageController {
     private final CategoryService categoryService;
     private final ContactTypeService contactTypeService;
 
-    public ResumePageController(ResumeService resumeService, CategoryService categoryService,
+    public ResumePageController(ResumeService resumeService,
+                                CategoryService categoryService,
                                 ContactTypeService contactTypeService) {
         this.resumeService = resumeService;
         this.categoryService = categoryService;
         this.contactTypeService = contactTypeService;
     }
 
+    @GetMapping
+    public String resumes(Model model) {
+        model.addAttribute("resumes", resumeService.getAllActiveResumes());
+        return "resumes/list";
+    }
+
     @GetMapping("/create")
     public String createForm(Model model) {
         ResumeFormDto dto = new ResumeFormDto();
+
         padTo3(dto.getEducationList(), EducationInfoDto::new);
         padTo3(dto.getWorkExperienceList(), WorkExperienceInfoDto::new);
         padTo3(dto.getContactList(), ContactInfoDto::new);
 
         model.addAttribute("resumeDto", dto);
         addReferenceData(model);
+
         return "resumes/form";
     }
 
@@ -65,6 +74,9 @@ public class ResumePageController {
                          BindingResult bindingResult,
                          @AuthenticationPrincipal CustomUserDetails userDetails,
                          Model model) {
+
+        validateAdditionalBlocks(dto, bindingResult);
+
         if (bindingResult.hasErrors()) {
             addReferenceData(model);
             return "resumes/form";
@@ -73,30 +85,56 @@ public class ResumePageController {
         Resume resume = toModel(dto);
         resume.setApplicantId(userDetails.getUser().getId());
 
-        resumeService.createResume(resume, filterEducation(dto), filterExperience(dto), filterContacts(dto));
+        resumeService.createResume(
+                resume,
+                filterEducation(dto),
+                filterExperience(dto),
+                filterContacts(dto)
+        );
 
         return "redirect:/pages/cabinet";
     }
 
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public String editForm(@PathVariable Long id,
+                           Model model,
+                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+
         Resume resume = resumeService.getResumeById(id);
+
         if (!resume.getApplicantId().equals(userDetails.getUser().getId())) {
-            throw new ForbiddenOperationException("Вы не являетесь владельцем этого резюме");
+            throw new ForbiddenOperationException(
+                    "Вы не являетесь владельцем этого резюме"
+            );
         }
 
         ResumeFormDto dto = new ResumeFormDto();
+
         dto.setName(resume.getName());
         dto.setCategoryId(resume.getCategoryId());
         dto.setSalary(resume.getSalary());
         dto.setIsActive(resume.getIsActive());
 
         List<EducationInfoDto> education = new ArrayList<>(
-                resumeService.getEducationByResumeId(id).stream().map(ResumeMapper::toDto).toList());
+                resumeService.getEducationByResumeId(id)
+                        .stream()
+                        .map(ResumeMapper::toDto)
+                        .toList()
+        );
+
         List<WorkExperienceInfoDto> experience = new ArrayList<>(
-                resumeService.getWorkExperienceByResumeId(id).stream().map(ResumeMapper::toDto).toList());
+                resumeService.getWorkExperienceByResumeId(id)
+                        .stream()
+                        .map(ResumeMapper::toDto)
+                        .toList()
+        );
+
         List<ContactInfoDto> contacts = new ArrayList<>(
-                resumeService.getContactsByResumeId(id).stream().map(ResumeMapper::toDto).toList());
+                resumeService.getContactsByResumeId(id)
+                        .stream()
+                        .map(ResumeMapper::toDto)
+                        .toList()
+        );
 
         padTo3(education, EducationInfoDto::new);
         padTo3(experience, WorkExperienceInfoDto::new);
@@ -108,7 +146,9 @@ public class ResumePageController {
 
         model.addAttribute("resumeDto", dto);
         model.addAttribute("resumeId", id);
+
         addReferenceData(model);
+
         return "resumes/form";
     }
 
@@ -118,6 +158,9 @@ public class ResumePageController {
                        BindingResult bindingResult,
                        @AuthenticationPrincipal CustomUserDetails userDetails,
                        Model model) {
+
+        validateAdditionalBlocks(dto, bindingResult);
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("resumeId", id);
             addReferenceData(model);
@@ -125,59 +168,275 @@ public class ResumePageController {
         }
 
         Resume resume = toModel(dto);
-        resumeService.updateResume(id, resume, filterEducation(dto), filterExperience(dto), filterContacts(dto),
-                userDetails.getUser().getId());
+
+        resumeService.updateResume(
+                id,
+                resume,
+                filterEducation(dto),
+                filterExperience(dto),
+                filterContacts(dto),
+                userDetails.getUser().getId()
+        );
 
         return "redirect:/pages/cabinet";
     }
 
+    private void validateAdditionalBlocks(ResumeFormDto dto,
+                                          BindingResult bindingResult) {
+
+        validateEducation(dto.getEducationList(), bindingResult);
+        validateWorkExperience(dto.getWorkExperienceList(), bindingResult);
+        validateContacts(dto.getContactList(), bindingResult);
+    }
+
+    private void validateEducation(List<EducationInfoDto> educationList,
+                                   BindingResult bindingResult) {
+
+        if (educationList == null) {
+            return;
+        }
+
+        for (int i = 0; i < educationList.size(); i++) {
+
+            EducationInfoDto education = educationList.get(i);
+
+            if (isEducationEmpty(education)) {
+                continue;
+            }
+
+            if (!notBlank(education.getInstitution())) {
+                bindingResult.rejectValue(
+                        "educationList[" + i + "].institution",
+                        "education.institution",
+                        "Учебное заведение обязательно для заполнения"
+                );
+            }
+
+            if (!notBlank(education.getProgram())) {
+                bindingResult.rejectValue(
+                        "educationList[" + i + "].program",
+                        "education.program",
+                        "Программа обучения обязательна для заполнения"
+                );
+            }
+
+            if (education.getStartDate() == null) {
+                bindingResult.rejectValue(
+                        "educationList[" + i + "].startDate",
+                        "education.startDate",
+                        "Дата начала обучения обязательна"
+                );
+            }
+
+            if (!notBlank(education.getDegree())) {
+                bindingResult.rejectValue(
+                        "educationList[" + i + "].degree",
+                        "education.degree",
+                        "Степень обязательна для заполнения"
+                );
+            }
+        }
+    }
+
+    private void validateWorkExperience(
+            List<WorkExperienceInfoDto> experienceList,
+            BindingResult bindingResult) {
+
+        if (experienceList == null) {
+            return;
+        }
+
+        for (int i = 0; i < experienceList.size(); i++) {
+
+            WorkExperienceInfoDto experience = experienceList.get(i);
+
+            if (isWorkExperienceEmpty(experience)) {
+                continue;
+            }
+
+            if (experience.getYears() == null) {
+                bindingResult.rejectValue(
+                        "workExperienceList[" + i + "].years",
+                        "experience.years",
+                        "Количество лет опыта обязательно"
+                );
+            } else if (experience.getYears() < 0) {
+                bindingResult.rejectValue(
+                        "workExperienceList[" + i + "].years",
+                        "experience.years",
+                        "Количество лет опыта не может быть отрицательным"
+                );
+            }
+
+            if (!notBlank(experience.getCompanyName())) {
+                bindingResult.rejectValue(
+                        "workExperienceList[" + i + "].companyName",
+                        "experience.companyName",
+                        "Название компании обязательно для заполнения"
+                );
+            }
+
+            if (!notBlank(experience.getPosition())) {
+                bindingResult.rejectValue(
+                        "workExperienceList[" + i + "].position",
+                        "experience.position",
+                        "Должность обязательна для заполнения"
+                );
+            }
+
+            if (!notBlank(experience.getResponsibilities())) {
+                bindingResult.rejectValue(
+                        "workExperienceList[" + i + "].responsibilities",
+                        "experience.responsibilities",
+                        "Обязанности обязательны для заполнения"
+                );
+            }
+        }
+    }
+
+    private void validateContacts(List<ContactInfoDto> contactList,
+                                  BindingResult bindingResult) {
+
+        if (contactList == null) {
+            return;
+        }
+
+        for (int i = 0; i < contactList.size(); i++) {
+
+            ContactInfoDto contact = contactList.get(i);
+
+            if (isContactEmpty(contact)) {
+                continue;
+            }
+
+            if (contact.getTypeId() == null) {
+                bindingResult.rejectValue(
+                        "contactList[" + i + "].typeId",
+                        "contact.typeId",
+                        "Тип контакта обязателен"
+                );
+            }
+
+            if (!notBlank(contact.getValue())) {
+                bindingResult.rejectValue(
+                        "contactList[" + i + "].value",
+                        "contact.value",
+                        "Значение контакта обязательно для заполнения"
+                );
+            }
+        }
+    }
+
+    private boolean isEducationEmpty(EducationInfoDto education) {
+        return education == null
+                || (!notBlank(education.getInstitution())
+                && !notBlank(education.getProgram())
+                && education.getStartDate() == null
+                && education.getEndDate() == null
+                && !notBlank(education.getDegree()));
+    }
+
+    private boolean isWorkExperienceEmpty(WorkExperienceInfoDto experience) {
+        return experience == null
+                || (experience.getYears() == null
+                && !notBlank(experience.getCompanyName())
+                && !notBlank(experience.getPosition())
+                && !notBlank(experience.getResponsibilities()));
+    }
+
+    private boolean isContactEmpty(ContactInfoDto contact) {
+        return contact == null
+                || (contact.getTypeId() == null
+                && !notBlank(contact.getValue()));
+    }
+
     private void addReferenceData(Model model) {
+
         Map<String, String> categories = new LinkedHashMap<>();
-        categoryService.getAllCategories().forEach(c -> categories.put(String.valueOf(c.getId()), c.getName()));
+
+        categoryService.getAllCategories()
+                .forEach(c ->
+                        categories.put(
+                                String.valueOf(c.getId()),
+                                c.getName()
+                        )
+                );
+
         model.addAttribute("categories", categories);
 
         Map<String, String> contactTypes = new LinkedHashMap<>();
-        contactTypeService.getAllContactTypes().forEach(t -> contactTypes.put(String.valueOf(t.getId()), t.getType()));
+
+        contactTypeService.getAllContactTypes()
+                .forEach(t ->
+                        contactTypes.put(
+                                String.valueOf(t.getId()),
+                                t.getType()
+                        )
+                );
+
         model.addAttribute("contactTypes", contactTypes);
     }
 
     private Resume toModel(ResumeFormDto dto) {
+
         Resume resume = new Resume();
+
         resume.setName(dto.getName());
         resume.setCategoryId(dto.getCategoryId());
         resume.setSalary(dto.getSalary());
-        resume.setIsActive(dto.getIsActive() == null || dto.getIsActive());
+        resume.setIsActive(
+                dto.getIsActive() == null || dto.getIsActive()
+        );
+
         return resume;
     }
 
     private List<EducationInfo> filterEducation(ResumeFormDto dto) {
-        return dto.getEducationList().stream()
-                .filter(e -> notBlank(e.getInstitution()) && notBlank(e.getProgram())
-                        && notBlank(e.getDegree()) && e.getStartDate() != null)
+
+        return dto.getEducationList()
+                .stream()
+                .filter(e ->
+                        notBlank(e.getInstitution())
+                                && notBlank(e.getProgram())
+                                && notBlank(e.getDegree())
+                                && e.getStartDate() != null
+                )
                 .map(ResumeMapper::toModel)
                 .toList();
     }
 
     private List<WorkExperienceInfo> filterExperience(ResumeFormDto dto) {
-        return dto.getWorkExperienceList().stream()
-                .filter(w -> notBlank(w.getCompanyName()) && notBlank(w.getPosition())
-                        && notBlank(w.getResponsibilities()) && w.getYears() != null)
+
+        return dto.getWorkExperienceList()
+                .stream()
+                .filter(w ->
+                        notBlank(w.getCompanyName())
+                                && notBlank(w.getPosition())
+                                && notBlank(w.getResponsibilities())
+                                && w.getYears() != null
+                )
                 .map(ResumeMapper::toModel)
                 .toList();
     }
 
     private List<ContactInfo> filterContacts(ResumeFormDto dto) {
-        return dto.getContactList().stream()
-                .filter(c -> c.getTypeId() != null && notBlank(c.getValue()))
+
+        return dto.getContactList()
+                .stream()
+                .filter(c ->
+                        c.getTypeId() != null
+                                && notBlank(c.getValue())
+                )
                 .map(ResumeMapper::toModel)
                 .toList();
     }
 
-    private boolean notBlank(String s) {
-        return s != null && !s.isBlank();
+    private boolean notBlank(String value) {
+        return value != null && !value.isBlank();
     }
 
     private <T> void padTo3(List<T> list, Supplier<T> supplier) {
+
         while (list.size() < EMPTY_ROWS) {
             list.add(supplier.get());
         }

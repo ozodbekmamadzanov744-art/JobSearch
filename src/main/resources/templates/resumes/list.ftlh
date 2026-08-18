@@ -9,7 +9,7 @@
             <div class="card-body">
                 <h5 class="card-title">${resume.name}</h5>
                 <p class="card-text text-muted">
-                    Ожидаемая зарплата: ${resume.salary} · Обновлено: ${resume.updateTime?string("dd.MM.yyyy")}
+                    Ожидаемая зарплата: ${resume.salary} · Обновлено: <#if resume.updateTime??>${resume.updateTime.toString()?substring(0,10)}<#else>—</#if>
                 </p>
             </div>
         </div>
