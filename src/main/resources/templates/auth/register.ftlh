@@ -23,7 +23,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" id="nameLabel">Имя пользователя</label>
+                        <label class="form-label">Имя / Название компании</label>
                         <@spring.formInput "registrationDto.name" 'class="form-control"'/>
                         <@spring.showErrors "<br>" "text-danger small"/>
                     </div>
@@ -57,12 +57,4 @@
         </div>
     </div>
 
-    <script>
-        document.querySelectorAll('input[name="accountType"]').forEach(radio => {
-            radio.addEventListener('change', () => {
-                document.getElementById('nameLabel').textContent =
-                    radio.value === 'EMPLOYER' ? 'Имя компании' : 'Имя пользователя';
-            });
-        });
-    </script>
 </@layout.layout>
