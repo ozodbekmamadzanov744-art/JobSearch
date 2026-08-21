@@ -17,7 +17,10 @@
                 <form action="<#if resumeId??>/pages/resumes/${resumeId}/edit<#else>/pages/resumes/create</#if>"
                       method="post">
 
-                    <!-- Основная информация -->
+                    <#if _csrf??>
+                        <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
+                    </#if>
+
 
                     <div class="mb-3">
                         <label class="form-label">Название резюме</label>
@@ -68,7 +71,6 @@
 
                     <hr>
 
-                    <!-- Образование -->
 
                     <h5 class="mb-3">
                         Образование
@@ -134,7 +136,6 @@
                         </div>
                     </#list>
 
-                    <!-- Опыт работы -->
 
                     <h5 class="mb-3">
                         Опыт работы
@@ -193,7 +194,6 @@
                         </div>
                     </#list>
 
-                    <!-- Контакты -->
 
                     <h5 class="mb-3">
                         Контакты

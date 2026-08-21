@@ -9,6 +9,9 @@
                 <div class="text-center mb-4">
                     <img src="${user.avatar!'/images/default-avatar.png'}" class="rounded-circle mb-2" width="100" height="100" style="object-fit: cover;">
                     <form action="/pages/profile/avatar" method="post" enctype="multipart/form-data">
+                        <#if _csrf??>
+                            <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
+                        </#if>
                         <input type="file" name="avatar" accept="image/*" class="form-control mb-2">
                         <button type="submit" class="btn btn-outline-secondary btn-sm">Обновить фото</button>
                     </form>
@@ -16,6 +19,9 @@
                 <hr class="mb-4">
 
                 <form action="/pages/profile/edit" method="post">
+                    <#if _csrf??>
+                        <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
+                    </#if>
                     <div class="mb-3">
                         <label class="form-label">Имя</label>
                         <@spring.formInput "profileDto.name" 'class="form-control"'/>

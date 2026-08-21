@@ -17,6 +17,10 @@
                 <form action="<#if vacancyId??>/pages/vacancies/${vacancyId}/edit<#else>/pages/vacancies/create</#if>"
                       method="post">
 
+                    <#if _csrf??>
+                        <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
+                    </#if>
+
                     <div class="mb-3">
                         <label class="form-label">Название вакансии</label>
 
