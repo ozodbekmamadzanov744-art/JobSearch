@@ -30,7 +30,12 @@
             <#if known>
                 <p class="text-light m-2 mb-0">Привет, ${currentUser.username}</p>
                 <a href="/pages/cabinet" class="btn btn-outline-light m-1">Личный кабинет</a>
-                <a href="/logout" class="btn btn-outline-danger m-1">Выйти</a>
+                <form action="/logout" method="post" class="m-1 d-inline">
+                    <#if _csrf??>
+                        <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
+                    </#if>
+                    <button type="submit" class="btn btn-outline-danger">Выйти</button>
+                </form>
             <#else>
                 <a href="/pages/auth/login" class="btn btn-outline-light m-1">Войти</a>
                 <a href="/pages/auth/register" class="btn btn-outline-info m-1">Регистрация</a>
@@ -44,7 +49,6 @@
     </html>
 </#macro>
 
-<#-- Универсальная постраничная навигация для org.springframework.data.domain.Page -->
 <#macro pagination pageObj baseUrl extra="">
     <#if pageObj.totalPages gt 1>
         <nav aria-label="Постраничная навигация" class="mt-3">

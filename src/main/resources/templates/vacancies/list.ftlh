@@ -26,6 +26,9 @@
                 <#if currentUser?? && currentUser.accountType == "APPLICANT">
                     <#if applicantResumes?? && applicantResumes?size gt 0>
                         <form action="/pages/vacancies/${vacancy.id}/respond" method="post" class="d-flex gap-2 align-items-center">
+                            <#if _csrf??>
+                                <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
+                            </#if>
                             <select name="resumeId" class="form-select form-select-sm" style="max-width: 320px;">
                                 <#list applicantResumes as resume>
                                     <option value="${resume.id}">${resume.name}</option>

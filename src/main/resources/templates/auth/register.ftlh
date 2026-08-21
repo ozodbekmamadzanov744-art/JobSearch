@@ -11,6 +11,9 @@
                 </#if>
 
                 <form action="/pages/auth/register" method="post" enctype="multipart/form-data">
+                    <#if _csrf??>
+                        <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
+                    </#if>
                     <div class="mb-3">
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="accountType" id="roleApplicant" value="APPLICANT" checked>
