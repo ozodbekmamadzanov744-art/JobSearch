@@ -1,28 +1,39 @@
 package kg.attractor.jobsearch.config;
 
 import kg.attractor.jobsearch.security.CustomUserDetailsService;
+import kg.attractor.jobsearch.security.RoleBasedAuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
+    private final RoleBasedAuthenticationSuccessHandler roleBasedAuthenticationSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .ignoringRequestMatchers(
+                                "/h2-console/**",
+                                "/auth/**",
+                                "/resumes/**",
+                                "/vacancies/**",
+                                "/users/**"
+                        ))
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**").permitAll()
@@ -61,12 +72,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)
-                .httpBasic(Customizer.withDefaults())
                 .exceptionHandling(handling -> handling.accessDeniedHandler(accessDeniedHandler()))
                 .formLogin(form -> form
                         .loginPage("/pages/auth/login")
                         .loginProcessingUrl("/pages/auth/login")
-                        .defaultSuccessUrl("/pages/cabinet", true)
+                        .successHandler(roleBasedAuthenticationSuccessHandler)
                         .failureUrl("/pages/auth/login?error=true")
                         .permitAll())
                 .logout(logout -> logout
@@ -82,5 +92,10 @@ public class SecurityConfig {
     public AccessDeniedHandler accessDeniedHandler() {
         return (request, response, accessDeniedException) ->
                 request.getRequestDispatcher("/errors/403").forward(request, response);
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 }
