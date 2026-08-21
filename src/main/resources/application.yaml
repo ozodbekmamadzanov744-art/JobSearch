@@ -10,6 +10,7 @@ spring:
     change-log: classpath:db/changelog/changelog-master.yaml
   freemarker:
     expose-session-attributes: true
+    expose-request-attributes: true
   h2:
     console:
       enabled: true
