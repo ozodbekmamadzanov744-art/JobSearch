@@ -20,11 +20,8 @@ public class EducationInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "resume_id")
-    private Long resumeId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "resume_id", insertable = false, updatable = false)
+    @JoinColumn(name = "resume_id")
     private Resume resume;
 
     private String institution;

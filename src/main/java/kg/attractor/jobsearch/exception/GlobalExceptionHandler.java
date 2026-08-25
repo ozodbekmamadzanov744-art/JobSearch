@@ -1,12 +1,14 @@
 package kg.attractor.jobsearch.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -41,6 +43,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public String handleGeneral(Exception ex, HttpServletRequest request, Model model) {
+        log.error("Необработанное исключение при обработке запроса {}", request.getRequestURI(), ex);
         return buildErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера", request, model);
     }
 

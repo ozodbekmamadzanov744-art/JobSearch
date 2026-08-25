@@ -3,8 +3,10 @@ package kg.attractor.jobsearch.controller;
 import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.VacancyFormDto;
 import kg.attractor.jobsearch.exception.ForbiddenOperationException;
+import kg.attractor.jobsearch.model.Category;
 import kg.attractor.jobsearch.model.RespondedApplicant;
 import kg.attractor.jobsearch.model.Resume;
+import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.Vacancy;
 import kg.attractor.jobsearch.security.CustomUserDetails;
 import kg.attractor.jobsearch.service.*;
@@ -108,7 +110,9 @@ public class VacancyPageController {
         }
 
         Vacancy vacancy = toModel(dto);
-        vacancy.setAuthorId(userDetails.getUser().getId());
+        User author = new User();
+        author.setId(userDetails.getUser().getId());
+        vacancy.setAuthor(author);
 
         vacancyService.createVacancy(vacancy);
 
@@ -122,7 +126,7 @@ public class VacancyPageController {
 
         Vacancy vacancy = vacancyService.getVacancyById(id);
 
-        if (!vacancy.getAuthorId().equals(userDetails.getUser().getId())) {
+        if (vacancy.getAuthor() == null || !vacancy.getAuthor().getId().equals(userDetails.getUser().getId())) {
             throw new ForbiddenOperationException(
                     "Вы не являетесь автором этой вакансии"
             );
@@ -132,7 +136,7 @@ public class VacancyPageController {
 
         dto.setName(vacancy.getName());
         dto.setDescription(vacancy.getDescription());
-        dto.setCategoryId(vacancy.getCategoryId());
+        dto.setCategoryId(vacancy.getCategory() != null ? vacancy.getCategory().getId() : null);
         dto.setSalary(vacancy.getSalary());
         dto.setExpFrom(vacancy.getExpFrom());
         dto.setExpTo(vacancy.getExpTo());
@@ -190,7 +194,7 @@ public class VacancyPageController {
 
         Resume resume = resumeService.getResumeById(resumeId);
 
-        if (!resume.getApplicantId().equals(userDetails.getUser().getId())) {
+        if (resume.getApplicant() == null || !resume.getApplicant().getId().equals(userDetails.getUser().getId())) {
             throw new ForbiddenOperationException(
                     "Нельзя откликнуться чужим резюме"
             );
@@ -198,7 +202,9 @@ public class VacancyPageController {
 
         RespondedApplicant response = new RespondedApplicant();
 
-        response.setResumeId(resumeId);
+        Resume resumeReference = new Resume();
+        resumeReference.setId(resumeId);
+        response.setResume(resumeReference);
 
         vacancyService.respondToVacancy(id, response);
 
@@ -223,7 +229,13 @@ public class VacancyPageController {
 
         vacancy.setName(dto.getName());
         vacancy.setDescription(dto.getDescription());
-        vacancy.setCategoryId(dto.getCategoryId());
+
+        if (dto.getCategoryId() != null) {
+            Category category = new Category();
+            category.setId(dto.getCategoryId());
+            vacancy.setCategory(category);
+        }
+
         vacancy.setSalary(dto.getSalary());
         vacancy.setExpFrom(dto.getExpFrom());
         vacancy.setExpTo(dto.getExpTo());
@@ -241,7 +253,7 @@ public class VacancyPageController {
 
         Vacancy vacancy = vacancyService.getVacancyById(id);
 
-        if (!vacancy.getAuthorId().equals(userDetails.getUser().getId())) {
+        if (vacancy.getAuthor() == null || !vacancy.getAuthor().getId().equals(userDetails.getUser().getId())) {
             throw new ForbiddenOperationException(
                     "Вы не являетесь автором этой вакансии"
             );
@@ -250,7 +262,9 @@ public class VacancyPageController {
         List<Resume> resumes = respondedApplicantService
                 .findByVacancyId(id)
                 .stream()
-                .map(RespondedApplicant::getResumeId)
+                .map(RespondedApplicant::getResume)
+                .filter(java.util.Objects::nonNull)
+                .map(Resume::getId)
                 .map(resumeService::getResumeById)
                 .toList();
 

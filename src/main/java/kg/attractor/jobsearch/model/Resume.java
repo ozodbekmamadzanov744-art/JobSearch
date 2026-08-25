@@ -20,21 +20,15 @@ public class Resume {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "applicant_id")
-    private Long applicantId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "applicant_id", insertable = false, updatable = false)
+    @JoinColumn(name = "applicant_id")
     private User applicant;
 
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "category_id")
-    private Long categoryId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    @JoinColumn(name = "category_id")
     private Category category;
 
     private Double salary;
