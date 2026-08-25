@@ -18,18 +18,12 @@ public class RespondedApplicant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "resume_id")
-    private Long resumeId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "resume_id", insertable = false, updatable = false)
+    @JoinColumn(name = "resume_id")
     private Resume resume;
 
-    @Column(name = "vacancy_id")
-    private Long vacancyId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vacancy_id", insertable = false, updatable = false)
+    @JoinColumn(name = "vacancy_id")
     private Vacancy vacancy;
 
     private Boolean confirmation;

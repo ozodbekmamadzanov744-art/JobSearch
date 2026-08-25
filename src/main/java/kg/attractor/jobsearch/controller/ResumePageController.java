@@ -7,9 +7,11 @@ import kg.attractor.jobsearch.dto.ResumeFormDto;
 import kg.attractor.jobsearch.dto.WorkExperienceInfoDto;
 import kg.attractor.jobsearch.exception.ForbiddenOperationException;
 import kg.attractor.jobsearch.mapper.ResumeMapper;
+import kg.attractor.jobsearch.model.Category;
 import kg.attractor.jobsearch.model.ContactInfo;
 import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
+import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
 import kg.attractor.jobsearch.security.CustomUserDetails;
 import kg.attractor.jobsearch.service.CategoryService;
@@ -89,7 +91,9 @@ public class ResumePageController {
         }
 
         Resume resume = toModel(dto);
-        resume.setApplicantId(userDetails.getUser().getId());
+        User applicant = new User();
+        applicant.setId(userDetails.getUser().getId());
+        resume.setApplicant(applicant);
 
         resumeService.createResume(
                 resume,
@@ -108,7 +112,7 @@ public class ResumePageController {
 
         Resume resume = resumeService.getResumeById(id);
 
-        if (!resume.getApplicantId().equals(userDetails.getUser().getId())) {
+        if (resume.getApplicant() == null || !resume.getApplicant().getId().equals(userDetails.getUser().getId())) {
             throw new ForbiddenOperationException(
                     "Вы не являетесь владельцем этого резюме"
             );
@@ -117,7 +121,7 @@ public class ResumePageController {
         ResumeFormDto dto = new ResumeFormDto();
 
         dto.setName(resume.getName());
-        dto.setCategoryId(resume.getCategoryId());
+        dto.setCategoryId(resume.getCategory() != null ? resume.getCategory().getId() : null);
         dto.setSalary(resume.getSalary());
         dto.setIsActive(resume.getIsActive());
 
@@ -388,7 +392,13 @@ public class ResumePageController {
         Resume resume = new Resume();
 
         resume.setName(dto.getName());
-        resume.setCategoryId(dto.getCategoryId());
+
+        if (dto.getCategoryId() != null) {
+            Category category = new Category();
+            category.setId(dto.getCategoryId());
+            resume.setCategory(category);
+        }
+
         resume.setSalary(dto.getSalary());
         resume.setIsActive(
                 dto.getIsActive() == null || dto.getIsActive()

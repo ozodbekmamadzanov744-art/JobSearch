@@ -35,7 +35,8 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public Vacancy createVacancy(Vacancy vacancy) {
-        log.info("Создание вакансии '{}' от работодателя id={}", vacancy.getName(), vacancy.getAuthorId());
+        Long authorId = vacancy.getAuthor() != null ? vacancy.getAuthor().getId() : null;
+        log.info("Создание вакансии '{}' от работодателя id={}", vacancy.getName(), authorId);
         if (vacancy.getIsActive() == null) {
             vacancy.setIsActive(true);
         }
@@ -46,13 +47,13 @@ public class VacancyServiceImpl implements VacancyService {
     public Vacancy updateVacancy(Long id, Vacancy vacancy, Long currentUserId) {
         Vacancy existing = getVacancyById(id);
 
-        if (!existing.getAuthorId().equals(currentUserId)) {
+        if (existing.getAuthor() == null || !existing.getAuthor().getId().equals(currentUserId)) {
             throw new ForbiddenOperationException("Вы не являетесь автором этой вакансии");
         }
 
         existing.setName(vacancy.getName());
         existing.setDescription(vacancy.getDescription());
-        existing.setCategoryId(vacancy.getCategoryId());
+        existing.setCategory(vacancy.getCategory());
         existing.setSalary(vacancy.getSalary());
         existing.setExpFrom(vacancy.getExpFrom());
         existing.setExpTo(vacancy.getExpTo());
@@ -65,7 +66,7 @@ public class VacancyServiceImpl implements VacancyService {
     public void deleteVacancy(Long id, Long currentUserId) {
         Vacancy existing = getVacancyById(id);
 
-        if (!existing.getAuthorId().equals(currentUserId)) {
+        if (existing.getAuthor() == null || !existing.getAuthor().getId().equals(currentUserId)) {
             throw new ForbiddenOperationException("Вы не являетесь автором этой вакансии");
         }
 
@@ -97,18 +98,21 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public RespondedApplicant respondToVacancy(Long vacancyId, RespondedApplicant response) {
-        log.info("Соискатель откликается резюме id={} на вакансию id={}", response.getResumeId(), vacancyId);
-        getVacancyById(vacancyId);
-        response.setVacancyId(vacancyId);
+        Long resumeId = response.getResume() != null ? response.getResume().getId() : null;
+        log.info("Соискатель откликается резюме id={} на вакансию id={}", resumeId, vacancyId);
+        Vacancy vacancy = getVacancyById(vacancyId);
+        response.setVacancy(vacancy);
         return respondedApplicantService.createResponse(response);
     }
 
     @Override
     public List<User> getApplicantsForVacancy(Long vacancyId) {
         return respondedApplicantService.findByVacancyId(vacancyId).stream()
-                .map(RespondedApplicant::getResumeId)
+                .map(RespondedApplicant::getResume)
+                .map(Resume::getId)
                 .map(resumeService::getResumeById)
-                .map(Resume::getApplicantId)
+                .map(Resume::getApplicant)
+                .map(User::getId)
                 .map(userService::getUserById)
                 .toList();
     }
@@ -117,7 +121,8 @@ public class VacancyServiceImpl implements VacancyService {
     public List<Vacancy> getVacanciesByApplicant(Long applicantId) {
         return resumeService.getResumesByApplicant(applicantId).stream()
                 .flatMap(resume -> respondedApplicantService.findByResumeId(resume.getId()).stream())
-                .map(RespondedApplicant::getVacancyId)
+                .map(RespondedApplicant::getVacancy)
+                .map(Vacancy::getId)
                 .distinct()
                 .map(this::getVacancyById)
                 .toList();

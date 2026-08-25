@@ -1,9 +1,12 @@
 package kg.attractor.jobsearch.mapper;
 
 import kg.attractor.jobsearch.dto.*;
+import kg.attractor.jobsearch.model.Category;
 import kg.attractor.jobsearch.model.ContactInfo;
+import kg.attractor.jobsearch.model.ContactType;
 import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
+import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
 
 import java.util.List;
@@ -15,9 +18,21 @@ public class ResumeMapper {
 
     public static Resume toModel(ResumeRequestDto dto) {
         Resume resume = new Resume();
-        resume.setApplicantId(dto.getApplicantId());
+
+        if (dto.getApplicantId() != null) {
+            User applicant = new User();
+            applicant.setId(dto.getApplicantId());
+            resume.setApplicant(applicant);
+        }
+
         resume.setName(dto.getName());
-        resume.setCategoryId(dto.getCategoryId());
+
+        if (dto.getCategoryId() != null) {
+            Category category = new Category();
+            category.setId(dto.getCategoryId());
+            resume.setCategory(category);
+        }
+
         resume.setSalary(dto.getSalary());
         resume.setIsActive(dto.getIsActive());
         return resume;
@@ -27,9 +42,9 @@ public class ResumeMapper {
                                           List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList) {
         ResumeResponseDto dto = new ResumeResponseDto();
         dto.setId(resume.getId());
-        dto.setApplicantId(resume.getApplicantId());
+        dto.setApplicantId(resume.getApplicant() != null ? resume.getApplicant().getId() : null);
         dto.setName(resume.getName());
-        dto.setCategoryId(resume.getCategoryId());
+        dto.setCategoryId(resume.getCategory() != null ? resume.getCategory().getId() : null);
         dto.setSalary(resume.getSalary());
         dto.setIsActive(resume.getIsActive());
         dto.setCreatedDate(resume.getCreatedDate());
@@ -42,7 +57,13 @@ public class ResumeMapper {
 
     public static ContactInfo toModel(ContactInfoDto dto) {
         ContactInfo contactInfo = new ContactInfo();
-        contactInfo.setTypeId(dto.getTypeId());
+
+        if (dto.getTypeId() != null) {
+            ContactType contactType = new ContactType();
+            contactType.setId(dto.getTypeId());
+            contactInfo.setContactType(contactType);
+        }
+
         contactInfo.setValue(dto.getValue());
         return contactInfo;
     }
@@ -50,7 +71,7 @@ public class ResumeMapper {
     public static ContactInfoDto toDto(ContactInfo contactInfo) {
         ContactInfoDto dto = new ContactInfoDto();
         dto.setId(contactInfo.getId());
-        dto.setTypeId(contactInfo.getTypeId());
+        dto.setTypeId(contactInfo.getContactType() != null ? contactInfo.getContactType().getId() : null);
         dto.setValue(contactInfo.getValue());
         return dto;
     }

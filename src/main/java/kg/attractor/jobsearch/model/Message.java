@@ -20,11 +20,8 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "responded_applicants_id")
-    private Long respondedApplicantsId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "responded_applicants_id", insertable = false, updatable = false)
+    @JoinColumn(name = "responded_applicants_id")
     private RespondedApplicant respondedApplicant;
 
     @Lob

@@ -21,10 +21,7 @@ public class Category {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "parent_id")
-    private Long parentId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id", insertable = false, updatable = false)
+    @JoinColumn(name = "parent_id")
     private Category parent;
 }

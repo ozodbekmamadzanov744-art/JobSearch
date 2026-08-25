@@ -18,7 +18,7 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
 
     @Query("""
             select v from Vacancy v
-            left join RespondedApplicant ra on ra.vacancyId = v.id
+            left join RespondedApplicant ra on ra.vacancy.id = v.id
             where v.isActive = true
             group by v
             order by count(ra) desc
@@ -27,8 +27,8 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
 
     @Query("""
             select v from Vacancy v
-            left join RespondedApplicant ra on ra.vacancyId = v.id
-            where v.authorId = :authorId
+            left join RespondedApplicant ra on ra.vacancy.id = v.id
+            where v.author.id = :authorId
             group by v
             order by count(ra) desc
             """)

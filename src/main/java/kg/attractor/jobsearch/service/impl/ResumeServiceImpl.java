@@ -34,7 +34,8 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public Resume createResume(Resume resume, List<EducationInfo> educationList,
                                List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList) {
-        log.info("Создание резюме '{}' для соискателя id={}", resume.getName(), resume.getApplicantId());
+        Long applicantId = resume.getApplicant() != null ? resume.getApplicant().getId() : null;
+        log.info("Создание резюме '{}' для соискателя id={}", resume.getName(), applicantId);
         if (resume.getIsActive() == null) {
             resume.setIsActive(true);
         }
@@ -54,12 +55,12 @@ public class ResumeServiceImpl implements ResumeService {
                                List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList, Long currentUserId) {
         Resume existing = getResumeById(id);
 
-        if (!existing.getApplicantId().equals(currentUserId)) {
+        if (existing.getApplicant() == null || !existing.getApplicant().getId().equals(currentUserId)) {
             throw new ForbiddenOperationException("Вы не являетесь владельцем этого резюме");
         }
 
         existing.setName(resume.getName());
-        existing.setCategoryId(resume.getCategoryId());
+        existing.setCategory(resume.getCategory());
         existing.setSalary(resume.getSalary());
         existing.setIsActive(resume.getIsActive());
         resumeRepository.save(existing);
@@ -80,7 +81,7 @@ public class ResumeServiceImpl implements ResumeService {
     public void deleteResume(Long id, Long currentUserId) {
         Resume existing = getResumeById(id);
 
-        if (!existing.getApplicantId().equals(currentUserId)) {
+        if (existing.getApplicant() == null || !existing.getApplicant().getId().equals(currentUserId)) {
             throw new ForbiddenOperationException("Вы не являетесь владельцем этого резюме");
         }
 
@@ -145,7 +146,7 @@ public class ResumeServiceImpl implements ResumeService {
             return;
         }
         for (EducationInfo education : educationList) {
-            education.setResumeId(resumeId);
+            education.setResume(resumeReference(resumeId));
             educationInfoService.save(education);
         }
     }
@@ -155,7 +156,7 @@ public class ResumeServiceImpl implements ResumeService {
             return;
         }
         for (WorkExperienceInfo workExperience : workExperienceList) {
-            workExperience.setResumeId(resumeId);
+            workExperience.setResume(resumeReference(resumeId));
             workExperienceInfoService.save(workExperience);
         }
     }
@@ -165,8 +166,14 @@ public class ResumeServiceImpl implements ResumeService {
             return;
         }
         for (ContactInfo contact : contactList) {
-            contact.setResumeId(resumeId);
+            contact.setResume(resumeReference(resumeId));
             contactInfoService.save(contact);
         }
+    }
+
+    private Resume resumeReference(Long resumeId) {
+        Resume resume = new Resume();
+        resume.setId(resumeId);
+        return resume;
     }
 }

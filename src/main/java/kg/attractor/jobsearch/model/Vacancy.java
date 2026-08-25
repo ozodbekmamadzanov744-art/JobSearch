@@ -26,11 +26,8 @@ public class Vacancy {
     @Lob
     private String description;
 
-    @Column(name = "category_id")
-    private Long categoryId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    @JoinColumn(name = "category_id")
     private Category category;
 
     private Double salary;
@@ -44,11 +41,8 @@ public class Vacancy {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    @Column(name = "author_id")
-    private Long authorId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", insertable = false, updatable = false)
+    @JoinColumn(name = "author_id")
     private User author;
 
     @Column(name = "created_date")

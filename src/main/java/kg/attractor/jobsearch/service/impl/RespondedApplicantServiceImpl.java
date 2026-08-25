@@ -19,10 +19,13 @@ public class RespondedApplicantServiceImpl implements RespondedApplicantService 
 
     @Override
     public RespondedApplicant createResponse(RespondedApplicant response) {
-        if (respondedApplicantRepository.existsByResumeIdAndVacancyId(response.getResumeId(), response.getVacancyId())) {
+        Long resumeId = response.getResume() != null ? response.getResume().getId() : null;
+        Long vacancyId = response.getVacancy() != null ? response.getVacancy().getId() : null;
+
+        if (respondedApplicantRepository.existsByResumeIdAndVacancyId(resumeId, vacancyId)) {
             throw new DuplicateResponseException("Соискатель уже откликнулся на эту вакансию этим резюме");
         }
-        log.info("Сохранён отклик: резюме id={} -> вакансия id={}", response.getResumeId(), response.getVacancyId());
+        log.info("Сохранён отклик: резюме id={} -> вакансия id={}", resumeId, vacancyId);
         return respondedApplicantRepository.save(response);
     }
 
