@@ -1,13 +1,18 @@
 package kg.attractor.jobsearch.controller;
 
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.UserRegistrationDto;
 import kg.attractor.jobsearch.exception.EmailAlreadyExistsException;
+import kg.attractor.jobsearch.exception.ResourceNotFoundException;
 import kg.attractor.jobsearch.mapper.UserMapper;
 import kg.attractor.jobsearch.model.User;
+import kg.attractor.jobsearch.service.PasswordResetService;
 import kg.attractor.jobsearch.service.UserService;
+import kg.attractor.jobsearch.util.Utility;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,16 +25,22 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.UnsupportedEncodingException;
+
+@Slf4j
 @Controller
 @RequestMapping("/pages/auth")
 public class AuthPageController {
 
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
+    private final PasswordResetService passwordResetService;
 
-    public AuthPageController(UserService userService, AuthenticationManager authenticationManager) {
+    public AuthPageController(UserService userService, AuthenticationManager authenticationManager,
+                              PasswordResetService passwordResetService) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
+        this.passwordResetService = passwordResetService;
     }
 
     @GetMapping("/login")
@@ -71,6 +82,48 @@ public class AuthPageController {
 
         boolean isEmployer = "EMPLOYER".equals(saved.getAccountType());
         return "redirect:" + (isEmployer ? "/pages/resumes" : "/pages/vacancies");
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPasswordForm() {
+        return "auth/forgot_password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String forgotPassword(@RequestParam String email, HttpServletRequest request, Model model) {
+        try {
+            passwordResetService.createResetToken(email, Utility.getSiteURL(request));
+            model.addAttribute("message", "Мы отправили ссылку для восстановления пароля на указанный email.");
+        } catch (ResourceNotFoundException e) {
+            model.addAttribute("error", "Пользователь с таким email не найден");
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            log.error("Не удалось отправить письмо для восстановления пароля на адрес {}", email, e);
+            model.addAttribute("error", "Не удалось отправить письмо. Попробуйте позже.");
+        }
+        return "auth/forgot_password";
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPasswordForm(@RequestParam String token, Model model) {
+        try {
+            passwordResetService.getByResetPasswordToken(token);
+            model.addAttribute("token", token);
+        } catch (ResourceNotFoundException e) {
+            model.addAttribute("error", e.getMessage());
+        }
+        return "auth/reset_password";
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestParam String token, @RequestParam String password, Model model) {
+        try {
+            User user = passwordResetService.getByResetPasswordToken(token);
+            passwordResetService.resetPassword(user, password);
+        } catch (ResourceNotFoundException e) {
+            model.addAttribute("error", e.getMessage());
+            return "auth/reset_password";
+        }
+        return "redirect:/pages/auth/login?reset=success";
     }
 
     private void authenticateAndCreateSession(String email, String rawPassword,

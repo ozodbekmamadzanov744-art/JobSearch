@@ -46,6 +46,9 @@ public class User {
     @Transient
     private String accountType;
 
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_roles",
