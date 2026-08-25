@@ -11,6 +11,18 @@ spring:
   freemarker:
     expose-session-attributes: true
     expose-request-attributes: true
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ozodbekmamadzanov9@gmail.com
+    password: kfnpfhvattmjaydn
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   h2:
     console:
       enabled: true
