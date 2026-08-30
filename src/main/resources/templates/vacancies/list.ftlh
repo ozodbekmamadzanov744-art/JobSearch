@@ -1,12 +1,17 @@
 <#import "../layout.ftlh" as layout>
 <@layout.layout title="Вакансии">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h2 class="mb-0">Актуальные вакансии</h2>
+    <div class="detail-band d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="h3 mb-1">Актуальные вакансии</h1>
+            <p class="text-muted mb-0">Список доступных предложений по работе.</p>
+        </div>
         <form method="get" class="d-flex align-items-center gap-2">
             <label class="form-label mb-0 text-nowrap">Сортировка:</label>
             <select name="sort" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
-                <option value="date" <#if currentSort == "date">selected</#if>>По дате публикации</option>
-                <option value="responses" <#if currentSort == "responses">selected</#if>>По количеству откликов</option>
+                <option value="date_desc" <#if currentSort == "date_desc" || currentSort == "date">selected</#if>>По дате публикации: сначала новые</option>
+                <option value="date_asc" <#if currentSort == "date_asc">selected</#if>>По дате публикации: сначала старые</option>
+                <option value="responses_desc" <#if currentSort == "responses_desc" || currentSort == "responses">selected</#if>>По количеству откликов: больше сначала</option>
+                <option value="responses_asc" <#if currentSort == "responses_asc">selected</#if>>По количеству откликов: меньше сначала</option>
             </select>
         </form>
     </div>
@@ -16,32 +21,20 @@
     </#if>
 
     <#list vacancies as vacancy>
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">${vacancy.name}</h5>
-                <p class="card-text text-muted">
-                    Зарплата: ${vacancy.salary} · Опыт: от ${vacancy.expFrom} до ${vacancy.expTo} лет
-                </p>
-                <p class="card-text">${vacancy.description}</p>
-                <#if currentUser?? && currentUser.accountType == "APPLICANT">
-                    <#if applicantResumes?? && applicantResumes?size gt 0>
-                        <form action="/pages/vacancies/${vacancy.id}/respond" method="post" class="d-flex gap-2 align-items-center">
-                            <#if _csrf??>
-                                <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
-                            </#if>
-                            <select name="resumeId" class="form-select form-select-sm" style="max-width: 320px;">
-                                <#list applicantResumes as resume>
-                                    <option value="${resume.id}">${resume.name}</option>
-                                </#list>
-                            </select>
-                            <button type="submit" class="btn btn-success btn-sm">Откликнуться</button>
-                        </form>
-                    <#else>
-                        <a href="/pages/resumes/create" class="btn btn-outline-success btn-sm">Создать резюме для отклика</a>
-                    </#if>
-                </#if>
+        <a href="/pages/vacancies/${vacancy.id}" class="text-decoration-none text-reset">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                        <div>
+                            <h2 class="h5 mb-1">${vacancy.name}</h2>
+                            <p class="text-muted mb-0">Опыт: от ${vacancy.expFrom!"—"} до ${vacancy.expTo!"—"} лет</p>
+                        </div>
+                        <div class="fw-semibold text-nowrap">${vacancy.salary!"—"}</div>
+                    </div>
+                    <p class="mb-0 mt-3 text-body-secondary">${vacancy.description}</p>
+                </div>
             </div>
-        </div>
+        </a>
     </#list>
 
     <#if vacancyPage??>

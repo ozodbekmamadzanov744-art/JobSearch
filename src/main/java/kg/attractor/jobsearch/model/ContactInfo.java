@@ -18,6 +18,9 @@ public class ContactInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "contact_value")
+    private String value;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id")
     private ContactType contactType;
@@ -25,7 +28,4 @@ public class ContactInfo {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "resume_id")
     private Resume resume;
-
-    @Column(name = "contact_value")
-    private String value;
 }

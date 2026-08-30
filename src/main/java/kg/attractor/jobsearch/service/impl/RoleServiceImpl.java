@@ -18,4 +18,10 @@ public class RoleServiceImpl implements RoleService {
         return roleRepository.findByName(name)
                 .orElseThrow(() -> new ResourceNotFoundException("Роль " + name + " не найдена"));
     }
+
+    @Override
+    public Role getRoleById(Long id) {
+        return roleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Роль с id " + id + " не найдена"));
+    }
 }

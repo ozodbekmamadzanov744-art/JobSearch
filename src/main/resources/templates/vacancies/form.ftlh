@@ -3,19 +3,21 @@
 
 <@layout.layout title="Вакансия">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card p-4">
-
-                <h2 class="mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                <div class="mb-4">
+                    <h1 class="h3 mb-1">
                     <#if vacancyId??>
                         Редактирование вакансии
                     <#else>
                         Новая вакансия
                     </#if>
-                </h2>
+                    </h1>
+                    <p class="text-muted mb-0">Сделайте вакансию понятной с первого взгляда.</p>
+                </div>
 
-                <form action="<#if vacancyId??>/pages/vacancies/${vacancyId}/edit<#else>/pages/vacancies/create</#if>"
-                      method="post">
+                <form action="<#if vacancyId??>/pages/vacancies/${vacancyId}/edit<#else>/pages/vacancies/create</#if>" method="post">
 
                     <#if _csrf??>
                         <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
@@ -23,14 +25,8 @@
 
                     <div class="mb-3">
                         <label class="form-label">Название вакансии</label>
-
-                        <@spring.formInput
-                        "vacancyDto.name"
-                        'class="form-control"'/>
-
-                        <@spring.showErrors
-                        "<br>"
-                        "text-danger small"/>
+                        <@spring.formInput "vacancyDto.name" 'class="form-control"'/>
+                        <@spring.showErrors "<br>" "text-danger small"/>
                     </div>
 
                     <div class="mb-3">
@@ -114,14 +110,9 @@
 
                     </div>
 
-                    <button
-                            type="submit"
-                            class="btn btn-primary w-100">
-                        Сохранить
-                    </button>
-
+                    <button type="submit" class="btn btn-primary w-100">Сохранить</button>
                 </form>
-
+                </div>
             </div>
         </div>
     </div>

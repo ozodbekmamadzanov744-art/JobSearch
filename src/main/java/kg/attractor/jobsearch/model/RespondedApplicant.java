@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,4 +30,19 @@ public class RespondedApplicant {
     private Vacancy vacancy;
 
     private Boolean confirmation;
+
+    @OneToMany(mappedBy = "respondedApplicant")
+    private Set<Message> messages = new HashSet<>();
+
+    public void addMessage(Message message) {
+        messages.add(message);
+        message.setRespondedApplicant(this);
+    }
+
+    public void removeMessage(Message message) {
+        messages.remove(message);
+        if (message.getRespondedApplicant() == this) {
+            message.setRespondedApplicant(null);
+        }
+    }
 }

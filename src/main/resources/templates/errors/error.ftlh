@@ -1,28 +1,45 @@
 <#import "../layout.ftlh" as layout>
 <@layout.layout title="Ошибка">
-    <div class="d-flex flex-column align-items-center text-center py-5">
-        <h1 class="display-1 text-danger">${status}</h1>
-        <h2 class="mb-4">Упс! <#if reason??>${reason}</#if></h2>
+    <div class="row justify-content-center py-4">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-body p-4 p-md-5 text-center">
+                    <div class="display-5 fw-semibold text-danger mb-2">${status}</div>
+                    <h1 class="h3 mb-3">Ошибка обработки запроса<#if reason??>: ${reason}</#if></h1>
+                    <#if message??>
+                        <p class="text-muted mb-4">${message}</p>
+                    </#if>
 
-        <#if message??>
-            <p class="lead mb-4">${message}</p>
-        </#if>
+                    <div class="detail-band text-start mb-4">
+                        <div class="row g-3">
+                            <#if details?? && details.serverName??>
+                                <div class="col-md-4">
+                                    <div class="muted-label">Хост</div>
+                                    <div class="fw-semibold">${details.serverName}</div>
+                                </div>
+                            </#if>
+                            <#if details?? && details.requestURL??>
+                                <div class="col-md-4">
+                                    <div class="muted-label">Запрошенный URI</div>
+                                    <div class="fw-semibold text-break">${details.requestURL}</div>
+                                </div>
+                            </#if>
+                            <#if details?? && details.serverPort??>
+                                <div class="col-md-4">
+                                    <div class="muted-label">Порт</div>
+                                    <div class="fw-semibold">${details.serverPort}</div>
+                                </div>
+                            </#if>
+                            <div class="col-12">
+                                <div class="muted-label">Время</div>
+                                <div class="fw-semibold">${.now}</div>
+                            </div>
+                        </div>
+                    </div>
 
-        <ul class="list-group mb-4 text-start" style="max-width: 500px; width: 100%;">
-            <#if details??>
-                <#if details.serverName??>
-                    <li class="list-group-item"><strong>Хост:</strong> <code>${details.serverName}</code></li>
-                </#if>
-                <#if details.requestURL??>
-                    <li class="list-group-item"><strong>Запрошенный URI:</strong> <code>${details.requestURL}</code></li>
-                </#if>
-                <#if details.serverPort??>
-                    <li class="list-group-item"><strong>Порт:</strong> <code>${details.serverPort}</code></li>
-                </#if>
-            </#if>
-            <li class="list-group-item"><strong>Время:</strong> <code>${.now}</code></li>
-        </ul>
-
-        <a href="/pages/vacancies" class="btn btn-primary">На главную</a>
+                    <a href="/pages/vacancies" class="btn btn-primary">На главную</a>
+                </div>
+            </div>
+        </div>
     </div>
 </@layout.layout>

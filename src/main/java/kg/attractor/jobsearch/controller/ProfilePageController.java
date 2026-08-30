@@ -48,13 +48,23 @@ public class ProfilePageController {
                        BindingResult bindingResult,
                        @AuthenticationPrincipal CustomUserDetails userDetails,
                        Model model) {
+        User currentUser = userDetails.getUser();
+        if ("APPLICANT".equals(currentUser.getAccountType())) {
+            if (dto.getSurname() == null || dto.getSurname().isBlank()) {
+                bindingResult.rejectValue("surname", "surname.required", "Фамилия обязательна для заполнения");
+            }
+            if (dto.getAge() == null) {
+                bindingResult.rejectValue("age", "age.required", "Возраст обязателен для заполнения");
+            }
+        }
+
         if (bindingResult.hasErrors()) {
-            model.addAttribute("accountType", userDetails.getUser().getAccountType());
-            model.addAttribute("user", userDetails.getUser());
+            model.addAttribute("accountType", currentUser.getAccountType());
+            model.addAttribute("user", currentUser);
             return "profile/edit";
         }
 
-        Long userId = userDetails.getUser().getId();
+        Long userId = currentUser.getId();
         User updates = UserMapper.toModel(dto);
         userService.updateProfile(userId, updates, userId);
 

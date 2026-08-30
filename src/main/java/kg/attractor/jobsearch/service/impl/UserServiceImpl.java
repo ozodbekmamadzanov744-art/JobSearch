@@ -7,7 +7,6 @@ import kg.attractor.jobsearch.model.Role;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.repository.UserRepository;
 import kg.attractor.jobsearch.service.RoleService;
-import kg.attractor.jobsearch.service.UserRoleService;
 import kg.attractor.jobsearch.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +37,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
-    private final UserRoleService userRoleService;
 
     @Override
     public User register(User user) {
@@ -60,7 +58,8 @@ public class UserServiceImpl implements UserService {
         User saved = userRepository.save(user);
 
         Role role = roleService.getRoleByName(requestedRole);
-        userRoleService.assignRole(saved.getId(), role.getId());
+        saved.getRoles().add(role);
+        userRepository.save(saved);
         saved.setAccountType(role.getName());
 
         log.info("Пользователь id={} успешно зарегистрирован с ролью {}", saved.getId(), role.getName());

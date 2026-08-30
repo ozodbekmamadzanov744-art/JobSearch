@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -44,6 +46,21 @@ public class Vacancy {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private User author;
+
+    @OneToMany(mappedBy = "vacancy")
+    private Set<RespondedApplicant> respondedApplicants = new HashSet<>();
+
+    public void addRespondedApplicant(RespondedApplicant respondedApplicant) {
+        respondedApplicants.add(respondedApplicant);
+        respondedApplicant.setVacancy(this);
+    }
+
+    public void removeRespondedApplicant(RespondedApplicant respondedApplicant) {
+        respondedApplicants.remove(respondedApplicant);
+        if (respondedApplicant.getVacancy() == this) {
+            respondedApplicant.setVacancy(null);
+        }
+    }
 
     @Column(name = "created_date")
     private LocalDateTime createdDate;

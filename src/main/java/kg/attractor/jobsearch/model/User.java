@@ -56,4 +56,34 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+    @OneToMany(mappedBy = "applicant")
+    private Set<Resume> resumes = new HashSet<>();
+
+    @OneToMany(mappedBy = "author")
+    private Set<Vacancy> vacancies = new HashSet<>();
+
+    public void addResume(Resume resume) {
+        resumes.add(resume);
+        resume.setApplicant(this);
+    }
+
+    public void removeResume(Resume resume) {
+        resumes.remove(resume);
+        if (resume.getApplicant() == this) {
+            resume.setApplicant(null);
+        }
+    }
+
+    public void addVacancy(Vacancy vacancy) {
+        vacancies.add(vacancy);
+        vacancy.setAuthor(this);
+    }
+
+    public void removeVacancy(Vacancy vacancy) {
+        vacancies.remove(vacancy);
+        if (vacancy.getAuthor() == this) {
+            vacancy.setAuthor(null);
+        }
+    }
 }

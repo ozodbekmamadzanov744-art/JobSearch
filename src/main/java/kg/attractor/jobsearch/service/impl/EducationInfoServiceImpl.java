@@ -5,6 +5,7 @@ import kg.attractor.jobsearch.repository.EducationInfoRepository;
 import kg.attractor.jobsearch.service.EducationInfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class EducationInfoServiceImpl implements EducationInfoService {
     }
 
     @Override
+    @Transactional
     public void deleteByResumeId(Long resumeId) {
         educationInfoRepository.deleteByResumeId(resumeId);
     }

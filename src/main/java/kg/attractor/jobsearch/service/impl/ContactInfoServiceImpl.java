@@ -5,6 +5,7 @@ import kg.attractor.jobsearch.repository.ContactInfoRepository;
 import kg.attractor.jobsearch.service.ContactInfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class ContactInfoServiceImpl implements ContactInfoService {
     }
 
     @Override
+    @Transactional
     public void deleteByResumeId(Long resumeId) {
         contactInfoRepository.deleteByResumeId(resumeId);
     }

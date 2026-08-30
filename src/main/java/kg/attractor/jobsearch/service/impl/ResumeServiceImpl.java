@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
+    @Transactional
     public Resume updateResume(Long id, Resume resume, List<EducationInfo> educationList,
                                List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList, Long currentUserId) {
         Resume existing = getResumeById(id);
@@ -78,6 +80,7 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
+    @Transactional
     public void deleteResume(Long id, Long currentUserId) {
         Resume existing = getResumeById(id);
 
@@ -92,6 +95,7 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Resume getResumeById(Long id) {
         return resumeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Резюме с id " + id + " не найдено"));

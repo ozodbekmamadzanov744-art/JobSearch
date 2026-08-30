@@ -78,6 +78,24 @@ public class VacancyPageController {
         return "vacancies/list";
     }
 
+    @GetMapping("/{id}")
+    public String detail(@PathVariable Long id,
+                         Model model,
+                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Vacancy vacancy = vacancyService.getVacancyById(id);
+        model.addAttribute("vacancy", vacancy);
+
+        if (userDetails != null) {
+            var user = userService.getUserById(userDetails.getUser().getId());
+            model.addAttribute("currentUser", user);
+            if ("APPLICANT".equals(user.getAccountType())) {
+                model.addAttribute("applicantResumes", resumeService.getResumesByApplicant(user.getId()));
+            }
+        }
+
+        return "vacancies/detail";
+    }
+
     @GetMapping("/create")
     public String createForm(Model model) {
         model.addAttribute("vacancyDto", new VacancyFormDto());
