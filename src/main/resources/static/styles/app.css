@@ -1,0 +1,88 @@
+body.app-shell {
+    background: #f4f6f8;
+    color: #1f2937;
+}
+
+.app-navbar {
+    background: #0f172a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.app-content {
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+}
+
+.card {
+    border: 1px solid #d7dee7;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.card-body {
+    padding: 1rem 1.1rem;
+}
+
+.form-control,
+.form-select {
+    border-radius: 8px;
+    border-color: #cfd8e3;
+}
+
+.btn {
+    border-radius: 8px;
+}
+
+.page-link {
+    border-radius: 6px !important;
+}
+
+a.text-reset {
+    color: inherit;
+}
+
+a.text-reset:hover .card {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+}
+
+.section-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.muted-label {
+    color: #6b7280;
+    font-size: 0.92rem;
+}
+
+.detail-band {
+    padding: 1.25rem;
+    background: #fff;
+    border: 1px solid #d7dee7;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.compact-list .card {
+    margin-bottom: 0.75rem;
+}
+
+.profile-avatar {
+    width: 88px;
+    height: 88px;
+    object-fit: cover;
+    border: 1px solid #d7dee7;
+    background: #fff;
+}
+
+.profile-avatar-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.detail-band .form-label {
+    margin-bottom: 0.4rem;
+}

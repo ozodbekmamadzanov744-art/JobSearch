@@ -162,6 +162,18 @@ public class ResumePageController {
         return "resumes/form";
     }
 
+    @GetMapping("/{id}")
+    public String detail(@PathVariable Long id, Model model) {
+        Resume resume = resumeService.getResumeById(id);
+
+        model.addAttribute("resume", resume);
+        model.addAttribute("educationList", resumeService.getEducationByResumeId(id));
+        model.addAttribute("workExperienceList", resumeService.getWorkExperienceByResumeId(id));
+        model.addAttribute("contactList", resumeService.getContactsByResumeId(id));
+
+        return "resumes/detail";
+    }
+
     @PostMapping("/{id}/edit")
     public String edit(@PathVariable Long id,
                        @Valid @ModelAttribute("resumeDto") ResumeFormDto dto,

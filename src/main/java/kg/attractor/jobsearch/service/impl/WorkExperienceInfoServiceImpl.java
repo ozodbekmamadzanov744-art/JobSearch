@@ -5,6 +5,7 @@ import kg.attractor.jobsearch.repository.WorkExperienceInfoRepository;
 import kg.attractor.jobsearch.service.WorkExperienceInfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class WorkExperienceInfoServiceImpl implements WorkExperienceInfoService 
     }
 
     @Override
+    @Transactional
     public void deleteByResumeId(Long resumeId) {
         workExperienceInfoRepository.deleteByResumeId(resumeId);
     }

@@ -27,6 +27,11 @@ import java.util.List;
 public class VacancyServiceImpl implements VacancyService {
 
     private static final String SORT_BY_RESPONSES = "responses";
+    private static final String SORT_BY_RESPONSES_ASC = "responses_asc";
+    private static final String SORT_BY_RESPONSES_DESC = "responses_desc";
+    private static final String SORT_BY_DATE = "date";
+    private static final String SORT_BY_DATE_ASC = "date_asc";
+    private static final String SORT_BY_DATE_DESC = "date_desc";
 
     private final VacancyRepository vacancyRepository;
     private final RespondedApplicantService respondedApplicantService;
@@ -130,19 +135,27 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public Page<Vacancy> getActiveVacancies(int page, int size, String sortBy) {
-        if (SORT_BY_RESPONSES.equals(sortBy)) {
+        if (SORT_BY_RESPONSES.equals(sortBy) || SORT_BY_RESPONSES_DESC.equals(sortBy)) {
             return vacancyRepository.findActiveOrderByResponseCountDesc(PageRequest.of(page, size));
         }
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        if (SORT_BY_RESPONSES_ASC.equals(sortBy)) {
+            return vacancyRepository.findActiveOrderByResponseCountAsc(PageRequest.of(page, size));
+        }
+        Sort.Direction direction = SORT_BY_DATE_ASC.equals(sortBy) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "createdDate"));
         return vacancyRepository.findByIsActiveTrue(pageable);
     }
 
     @Override
     public Page<Vacancy> getVacanciesByAuthor(Long authorId, int page, int size, String sortBy) {
-        if (SORT_BY_RESPONSES.equals(sortBy)) {
+        if (SORT_BY_RESPONSES.equals(sortBy) || SORT_BY_RESPONSES_DESC.equals(sortBy)) {
             return vacancyRepository.findByAuthorIdOrderByResponseCountDesc(authorId, PageRequest.of(page, size));
         }
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        if (SORT_BY_RESPONSES_ASC.equals(sortBy)) {
+            return vacancyRepository.findByAuthorIdOrderByResponseCountAsc(authorId, PageRequest.of(page, size));
+        }
+        Sort.Direction direction = SORT_BY_DATE_ASC.equals(sortBy) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "createdDate"));
         return vacancyRepository.findByAuthorId(authorId, pageable);
     }
 }

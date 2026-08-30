@@ -5,9 +5,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
 
     Page<Vacancy> findByIsActiveTrue(Pageable pageable);
@@ -28,9 +30,27 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
     @Query("""
             select v from Vacancy v
             left join RespondedApplicant ra on ra.vacancy.id = v.id
+            where v.isActive = true
+            group by v
+            order by count(ra) asc
+            """)
+    Page<Vacancy> findActiveOrderByResponseCountAsc(Pageable pageable);
+
+    @Query("""
+            select v from Vacancy v
+            left join RespondedApplicant ra on ra.vacancy.id = v.id
             where v.author.id = :authorId
             group by v
             order by count(ra) desc
             """)
     Page<Vacancy> findByAuthorIdOrderByResponseCountDesc(Long authorId, Pageable pageable);
+
+    @Query("""
+            select v from Vacancy v
+            left join RespondedApplicant ra on ra.vacancy.id = v.id
+            where v.author.id = :authorId
+            group by v
+            order by count(ra) asc
+            """)
+    Page<Vacancy> findByAuthorIdOrderByResponseCountAsc(Long authorId, Pageable pageable);
 }
