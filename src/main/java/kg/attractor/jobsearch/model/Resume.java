@@ -53,7 +53,7 @@ public class Resume {
     @OneToMany(mappedBy = "resume")
     private Set<WorkExperienceInfo> workExperienceInfos = new HashSet<>();
 
-    @OneToMany(mappedBy = "resume")
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<RespondedApplicant> respondedApplicants = new HashSet<>();
 
     public void addContactInfo(ContactInfo contactInfo) {
