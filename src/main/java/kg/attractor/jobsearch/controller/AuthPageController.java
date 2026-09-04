@@ -13,6 +13,8 @@ import kg.attractor.jobsearch.service.PasswordResetService;
 import kg.attractor.jobsearch.service.UserService;
 import kg.attractor.jobsearch.util.Utility;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,12 +37,14 @@ public class AuthPageController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final PasswordResetService passwordResetService;
+    private final MessageSource messageSource;
 
     public AuthPageController(UserService userService, AuthenticationManager authenticationManager,
-                              PasswordResetService passwordResetService) {
+                              PasswordResetService passwordResetService, MessageSource messageSource) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.passwordResetService = passwordResetService;
+        this.messageSource = messageSource;
     }
 
     @GetMapping("/login")
@@ -74,7 +78,7 @@ public class AuthPageController {
                 userService.uploadAvatar(saved.getId(), avatarFile, saved.getId());
             }
         } catch (EmailAlreadyExistsException e) {
-            model.addAttribute("generalError", e.getMessage());
+            model.addAttribute("generalError", resolve("error.registration.emailExists"));
             return "auth/register";
         }
 
@@ -93,12 +97,12 @@ public class AuthPageController {
     public String forgotPassword(@RequestParam String email, HttpServletRequest request, Model model) {
         try {
             passwordResetService.createResetToken(email, Utility.getSiteURL(request));
-            model.addAttribute("message", "Мы отправили ссылку для восстановления пароля на указанный email.");
+            model.addAttribute("message", resolve("forgot.success"));
         } catch (ResourceNotFoundException e) {
-            model.addAttribute("error", "Пользователь с таким email не найден");
+            model.addAttribute("error", resolve("forgot.userNotFound"));
         } catch (MessagingException | UnsupportedEncodingException e) {
-            log.error("Не удалось отправить письмо для восстановления пароля на адрес {}", email, e);
-            model.addAttribute("error", "Не удалось отправить письмо. Попробуйте позже.");
+            log.error("Failed to send password recovery email to address {}", email, e);
+            model.addAttribute("error", resolve("forgot.mailFailed"));
         }
         return "auth/forgot_password";
     }
@@ -109,7 +113,7 @@ public class AuthPageController {
             passwordResetService.getByResetPasswordToken(token);
             model.addAttribute("token", token);
         } catch (ResourceNotFoundException e) {
-            model.addAttribute("error", e.getMessage());
+            model.addAttribute("error", resolve("error.reset.invalidLink"));
         }
         return "auth/reset_password";
     }
@@ -120,7 +124,7 @@ public class AuthPageController {
             User user = passwordResetService.getByResetPasswordToken(token);
             passwordResetService.resetPassword(user, password);
         } catch (ResourceNotFoundException e) {
-            model.addAttribute("error", e.getMessage());
+            model.addAttribute("error", resolve("error.reset.invalidLink"));
             return "auth/reset_password";
         }
         return "redirect:/pages/auth/login?reset=success";
@@ -136,5 +140,9 @@ public class AuthPageController {
         SecurityContextHolder.setContext(context);
 
         new HttpSessionSecurityContextRepository().saveContext(context, request, response);
+    }
+
+    private String resolve(String code, Object... args) {
+        return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
     }
 }
