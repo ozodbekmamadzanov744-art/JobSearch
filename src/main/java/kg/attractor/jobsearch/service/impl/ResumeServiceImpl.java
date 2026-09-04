@@ -7,6 +7,7 @@ import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
 import kg.attractor.jobsearch.repository.ResumeRepository;
+import kg.attractor.jobsearch.repository.RespondedApplicantRepository;
 import kg.attractor.jobsearch.service.ContactInfoService;
 import kg.attractor.jobsearch.service.EducationInfoService;
 import kg.attractor.jobsearch.service.ResumeService;
@@ -31,6 +32,7 @@ public class ResumeServiceImpl implements ResumeService {
     private final EducationInfoService educationInfoService;
     private final WorkExperienceInfoService workExperienceInfoService;
     private final ContactInfoService contactInfoService;
+    private final RespondedApplicantRepository respondedApplicantRepository;
 
     @Override
     public Resume createResume(Resume resume, List<EducationInfo> educationList,
@@ -58,7 +60,7 @@ public class ResumeServiceImpl implements ResumeService {
         Resume existing = getResumeById(id);
 
         if (existing.getApplicant() == null || !existing.getApplicant().getId().equals(currentUserId)) {
-            throw new ForbiddenOperationException("Вы не являетесь владельцем этого резюме");
+            throw new ForbiddenOperationException("error.resume.owner");
         }
 
         existing.setName(resume.getName());
@@ -85,12 +87,13 @@ public class ResumeServiceImpl implements ResumeService {
         Resume existing = getResumeById(id);
 
         if (existing.getApplicant() == null || !existing.getApplicant().getId().equals(currentUserId)) {
-            throw new ForbiddenOperationException("Вы не являетесь владельцем этого резюме");
+            throw new ForbiddenOperationException("error.resume.owner");
         }
 
         educationInfoService.deleteByResumeId(id);
         workExperienceInfoService.deleteByResumeId(id);
         contactInfoService.deleteByResumeId(id);
+        respondedApplicantRepository.findByResumeId(id).forEach(respondedApplicantRepository::delete);
         resumeRepository.deleteById(id);
     }
 
@@ -98,7 +101,7 @@ public class ResumeServiceImpl implements ResumeService {
     @Transactional(readOnly = true)
     public Resume getResumeById(Long id) {
         return resumeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Резюме с id " + id + " не найдено"));
+                .orElseThrow(() -> new ResourceNotFoundException("error.notFound.resume"));
     }
 
     @Override

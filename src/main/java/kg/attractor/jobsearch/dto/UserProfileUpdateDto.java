@@ -12,15 +12,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserProfileUpdateDto {
 
-    @NotBlank(message = "Имя обязательно для заполнения")
+    @NotBlank(message = "{validation.user.name}")
     private String name;
 
     private String surname;
 
-    @Min(value = 14, message = "Возраст не может быть меньше 14")
-    @Max(value = 100, message = "Возраст не может быть больше 100")
+    @Min(value = 14, message = "{validation.user.age.min}")
+    @Max(value = 100, message = "{validation.user.age.max}")
     private Integer age;
 
-    @NotBlank(message = "Номер телефона обязателен для заполнения")
+    @NotBlank(message = "{validation.user.phone}")
     private String phoneNumber;
 }

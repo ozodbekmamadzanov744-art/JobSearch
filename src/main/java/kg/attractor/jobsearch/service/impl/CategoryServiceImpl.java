@@ -23,6 +23,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category getCategoryById(Long id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Категория с id " + id + " не найдена"));
+                .orElseThrow(() -> new ResourceNotFoundException("error.notFound.generic"));
     }
 }

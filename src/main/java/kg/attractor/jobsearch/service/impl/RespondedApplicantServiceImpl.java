@@ -23,7 +23,7 @@ public class RespondedApplicantServiceImpl implements RespondedApplicantService 
         Long vacancyId = response.getVacancy() != null ? response.getVacancy().getId() : null;
 
         if (respondedApplicantRepository.existsByResumeIdAndVacancyId(resumeId, vacancyId)) {
-            throw new DuplicateResponseException("Соискатель уже откликнулся на эту вакансию этим резюме");
+            throw new DuplicateResponseException("error.response.duplicate");
         }
         log.info("Сохранён отклик: резюме id={} -> вакансия id={}", resumeId, vacancyId);
         return respondedApplicantRepository.save(response);

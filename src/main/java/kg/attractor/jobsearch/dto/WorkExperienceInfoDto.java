@@ -14,16 +14,16 @@ public class WorkExperienceInfoDto {
 
     private Long id;
 
-    @NotNull(message = "Количество лет опыта обязательно")
-    @PositiveOrZero(message = "Количество лет опыта не может быть отрицательным")
+    @NotNull(message = "{validation.workExperience.years}")
+    @PositiveOrZero(message = "{validation.workExperience.years.positive}")
     private Integer years;
 
-    @NotBlank(message = "Название компании обязательно для заполнения")
+    @NotBlank(message = "{validation.workExperience.company}")
     private String companyName;
 
-    @NotBlank(message = "Должность обязательна для заполнения")
+    @NotBlank(message = "{validation.workExperience.position}")
     private String position;
 
-    @NotBlank(message = "Обязанности обязательны для заполнения")
+    @NotBlank(message = "{validation.workExperience.responsibilities}")
     private String responsibilities;
 }

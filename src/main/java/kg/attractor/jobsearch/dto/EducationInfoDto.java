@@ -15,17 +15,17 @@ public class EducationInfoDto {
 
     private Long id;
 
-    @NotBlank(message = "Учебное заведение обязательно для заполнения")
+    @NotBlank(message = "{validation.education.institution}")
     private String institution;
 
-    @NotBlank(message = "Программа обучения обязательна для заполнения")
+    @NotBlank(message = "{validation.education.program}")
     private String program;
 
-    @NotNull(message = "Дата начала обучения обязательна")
+    @NotNull(message = "{validation.education.startDate}")
     private LocalDate startDate;
 
     private LocalDate endDate;
 
-    @NotBlank(message = "Степень обязательна для заполнения")
+    @NotBlank(message = "{validation.education.degree}")
     private String degree;
 }

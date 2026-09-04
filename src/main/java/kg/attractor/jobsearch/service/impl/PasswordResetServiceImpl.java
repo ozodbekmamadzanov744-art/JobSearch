@@ -30,7 +30,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     @Transactional
     public void createResetToken(String email, String siteUrl) throws MessagingException, UnsupportedEncodingException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с email " + email + " не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("error.notFound.user"));
 
         String token = UUID.randomUUID().toString();
         user.setResetPasswordToken(token);
@@ -46,7 +46,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     public User getByResetPasswordToken(String token) {
         return userRepository.findByResetPasswordToken(token)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Ссылка для восстановления пароля недействительна или уже была использована"));
+                        "error.reset.invalidLink"));
     }
 
     @Override

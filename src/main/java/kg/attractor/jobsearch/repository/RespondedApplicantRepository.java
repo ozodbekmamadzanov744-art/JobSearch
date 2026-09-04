@@ -14,4 +14,6 @@ public interface RespondedApplicantRepository extends JpaRepository<RespondedApp
     List<RespondedApplicant> findByResumeId(Long resumeId);
 
     boolean existsByResumeIdAndVacancyId(Long resumeId, Long vacancyId);
+
+    void deleteByResumeId(Long resumeId);
 }

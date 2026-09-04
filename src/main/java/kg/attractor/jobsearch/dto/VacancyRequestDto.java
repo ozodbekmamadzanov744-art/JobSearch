@@ -10,29 +10,29 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VacancyRequestDto {
 
-    @NotBlank(message = "Название вакансии обязательно для заполнения")
+    @NotBlank(message = "{validation.vacancy.name}")
     private String name;
 
-    @NotBlank(message = "Описание вакансии обязательно для заполнения")
+    @NotBlank(message = "{validation.vacancy.description}")
     private String description;
 
-    @NotNull(message = "Категория обязательна")
+    @NotNull(message = "{validation.vacancy.category}")
     private Long categoryId;
 
-    @NotNull(message = "Зарплата обязательна")
-    @Positive(message = "Зарплата должна быть положительным числом")
+    @NotNull(message = "{validation.vacancy.salary}")
+    @Positive(message = "{validation.resume.salary.positive}")
     private Double salary;
 
-    @NotNull(message = "Минимальный опыт обязателен")
-    @PositiveOrZero(message = "Опыт не может быть отрицательным")
+    @NotNull(message = "{validation.vacancy.experience.from}")
+    @PositiveOrZero(message = "{validation.vacancy.experience}")
     private Integer expFrom;
 
-    @NotNull(message = "Максимальный опыт обязателен")
-    @PositiveOrZero(message = "Опыт не может быть отрицательным")
+    @NotNull(message = "{validation.vacancy.experience.to}")
+    @PositiveOrZero(message = "{validation.vacancy.experience}")
     private Integer expTo;
 
     private Boolean isActive;
 
-    @NotNull(message = "Id автора вакансии обязателен")
+    @NotNull(message = "{validation.vacancy.authorId}")
     private Long authorId;
 }
