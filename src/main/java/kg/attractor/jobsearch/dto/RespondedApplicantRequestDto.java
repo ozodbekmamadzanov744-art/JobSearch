@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RespondedApplicantRequestDto {
 
-    @NotNull(message = "Id резюме обязателен")
+    @NotNull(message = "{validation.resume.id}")
     private Long resumeId;
 }

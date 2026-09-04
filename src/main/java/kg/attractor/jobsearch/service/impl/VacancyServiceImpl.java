@@ -53,7 +53,7 @@ public class VacancyServiceImpl implements VacancyService {
         Vacancy existing = getVacancyById(id);
 
         if (existing.getAuthor() == null || !existing.getAuthor().getId().equals(currentUserId)) {
-            throw new ForbiddenOperationException("Вы не являетесь автором этой вакансии");
+            throw new ForbiddenOperationException("error.vacancy.owner");
         }
 
         existing.setName(vacancy.getName());
@@ -72,7 +72,7 @@ public class VacancyServiceImpl implements VacancyService {
         Vacancy existing = getVacancyById(id);
 
         if (existing.getAuthor() == null || !existing.getAuthor().getId().equals(currentUserId)) {
-            throw new ForbiddenOperationException("Вы не являетесь автором этой вакансии");
+            throw new ForbiddenOperationException("error.vacancy.owner");
         }
 
         vacancyRepository.deleteById(id);
@@ -81,7 +81,7 @@ public class VacancyServiceImpl implements VacancyService {
     @Override
     public Vacancy getVacancyById(Long id) {
         return vacancyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Вакансия с id " + id + " не найдена"));
+                .orElseThrow(() -> new ResourceNotFoundException("error.notFound.vacancy"));
     }
 
     @Override

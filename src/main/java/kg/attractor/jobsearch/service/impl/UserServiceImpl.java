@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
         if (existsByEmail(user.getEmail())) {
             log.warn("Попытка регистрации с уже занятым email {}", user.getEmail());
             throw new EmailAlreadyExistsException(
-                    "Пользователь с email " + user.getEmail() + " уже зарегистрирован");
+                    "error.registration.emailExists");
         }
 
         if (user.getAvatar() == null || user.getAvatar().isBlank()) {
@@ -69,7 +69,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id " + id + " не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("error.notFound.user"));
         populateAccountType(user);
         return user;
     }
@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByPhoneNumber(String phoneNumber) {
         User user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с телефоном " + phoneNumber + " не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("error.notFound.user"));
         populateAccountType(user);
         return user;
     }
@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с email " + email + " не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("error.notFound.user"));
         populateAccountType(user);
         return user;
     }
@@ -100,7 +100,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void uploadAvatar(Long id, MultipartFile file, Long currentUserId) {
         if (!id.equals(currentUserId)) {
-            throw new ForbiddenOperationException("Нельзя загрузить аватар другому пользователю");
+            throw new ForbiddenOperationException("error.edit.forbidden");
         }
 
         log.info("Загрузка аватара для пользователя id={}", id);
@@ -129,7 +129,7 @@ public class UserServiceImpl implements UserService {
             log.info("Аватар пользователя id={} обновлён: {}", id, user.getAvatar());
         } catch (IOException e) {
             log.error("Ошибка при сохранении файла аватара для пользователя id={}", id, e);
-            throw new UncheckedIOException("Ошибка при сохранении файла аватара", e);
+            throw new UncheckedIOException("error.server", e);
         }
     }
 
@@ -148,7 +148,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateProfile(Long id, User updates, Long currentUserId) {
         if (!id.equals(currentUserId)) {
-            throw new ForbiddenOperationException("Нельзя редактировать профиль другого пользователя");
+            throw new ForbiddenOperationException("error.edit.forbidden");
         }
 
         log.info("Обновление профиля пользователя id={}", id);

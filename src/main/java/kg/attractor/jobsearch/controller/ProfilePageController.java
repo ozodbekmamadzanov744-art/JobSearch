@@ -51,10 +51,10 @@ public class ProfilePageController {
         User currentUser = userDetails.getUser();
         if ("APPLICANT".equals(currentUser.getAccountType())) {
             if (dto.getSurname() == null || dto.getSurname().isBlank()) {
-                bindingResult.rejectValue("surname", "surname.required", "Фамилия обязательна для заполнения");
+                bindingResult.rejectValue("surname", "validation.profile.surname");
             }
             if (dto.getAge() == null) {
-                bindingResult.rejectValue("age", "age.required", "Возраст обязателен для заполнения");
+                bindingResult.rejectValue("age", "validation.profile.age");
             }
         }
 

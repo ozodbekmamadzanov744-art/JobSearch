@@ -10,29 +10,29 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserRegistrationDto {
 
-    @NotBlank(message = "Имя обязательно для заполнения")
+    @NotBlank(message = "{validation.user.name}")
     private String name;
 
     private String surname;
 
-    @Min(value = 14, message = "Возраст не может быть меньше 14")
-    @Max(value = 100, message = "Возраст не может быть больше 100")
+    @Min(value = 14, message = "{validation.user.age.min}")
+    @Max(value = 100, message = "{validation.user.age.max}")
     private Integer age;
 
-    @NotBlank(message = "Email обязателен для заполнения")
-    @Email(message = "Некорректный формат email")
+    @NotBlank(message = "{validation.user.email}")
+    @Email(message = "{validation.user.email.format}")
     private String email;
 
-    @NotBlank(message = "Пароль обязателен для заполнения")
-    @Size(min = 6, message = "Пароль должен содержать минимум 6 символов")
+    @NotBlank(message = "{validation.user.password}")
+    @Size(min = 6, message = "{validation.user.password.size}")
     private String password;
 
-    @NotBlank(message = "Номер телефона обязателен для заполнения")
+    @NotBlank(message = "{validation.user.phone}")
     private String phoneNumber;
 
     private String avatar;
 
-    @NotBlank(message = "Тип аккаунта обязателен для заполнения")
-    @Pattern(regexp = "APPLICANT|EMPLOYER", message = "Тип аккаунта должен быть APPLICANT или EMPLOYER")
+    @NotBlank(message = "{validation.user.accountType}")
+    @Pattern(regexp = "APPLICANT|EMPLOYER", message = "{validation.user.accountType.pattern}")
     private String accountType;
 }

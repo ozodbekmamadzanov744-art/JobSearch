@@ -114,7 +114,7 @@ public class ResumePageController {
 
         if (resume.getApplicant() == null || !resume.getApplicant().getId().equals(userDetails.getUser().getId())) {
             throw new ForbiddenOperationException(
-                    "Вы не являетесь владельцем этого резюме"
+                    "validation.resume.owner"
             );
         }
 
@@ -230,7 +230,7 @@ public class ResumePageController {
                 bindingResult.rejectValue(
                         "educationList[" + i + "].institution",
                         "education.institution",
-                        "Учебное заведение обязательно для заполнения"
+                        "validation.education.institution"
                 );
             }
 
@@ -238,7 +238,7 @@ public class ResumePageController {
                 bindingResult.rejectValue(
                         "educationList[" + i + "].program",
                         "education.program",
-                        "Программа обучения обязательна для заполнения"
+                        "validation.education.program"
                 );
             }
 
@@ -246,7 +246,7 @@ public class ResumePageController {
                 bindingResult.rejectValue(
                         "educationList[" + i + "].startDate",
                         "education.startDate",
-                        "Дата начала обучения обязательна"
+                        "validation.education.startDate"
                 );
             }
 
@@ -254,7 +254,7 @@ public class ResumePageController {
                 bindingResult.rejectValue(
                         "educationList[" + i + "].degree",
                         "education.degree",
-                        "Степень обязательна для заполнения"
+                        "validation.education.degree"
                 );
             }
         }
@@ -280,13 +280,13 @@ public class ResumePageController {
                 bindingResult.rejectValue(
                         "workExperienceList[" + i + "].years",
                         "experience.years",
-                        "Количество лет опыта обязательно"
+                        "validation.workExperience.years"
                 );
             } else if (experience.getYears() < 0) {
                 bindingResult.rejectValue(
                         "workExperienceList[" + i + "].years",
                         "experience.years",
-                        "Количество лет опыта не может быть отрицательным"
+                        "validation.workExperience.years.positive"
                 );
             }
 
@@ -294,7 +294,7 @@ public class ResumePageController {
                 bindingResult.rejectValue(
                         "workExperienceList[" + i + "].companyName",
                         "experience.companyName",
-                        "Название компании обязательно для заполнения"
+                        "validation.workExperience.company"
                 );
             }
 
@@ -302,7 +302,7 @@ public class ResumePageController {
                 bindingResult.rejectValue(
                         "workExperienceList[" + i + "].position",
                         "experience.position",
-                        "Должность обязательна для заполнения"
+                        "validation.workExperience.position"
                 );
             }
 
@@ -310,7 +310,7 @@ public class ResumePageController {
                 bindingResult.rejectValue(
                         "workExperienceList[" + i + "].responsibilities",
                         "experience.responsibilities",
-                        "Обязанности обязательны для заполнения"
+                        "validation.workExperience.responsibilities"
                 );
             }
         }
@@ -335,7 +335,7 @@ public class ResumePageController {
                 bindingResult.rejectValue(
                         "contactList[" + i + "].typeId",
                         "contact.typeId",
-                        "Тип контакта обязателен"
+                        "validation.contact.type"
                 );
             }
 
@@ -343,7 +343,7 @@ public class ResumePageController {
                 bindingResult.rejectValue(
                         "contactList[" + i + "].value",
                         "contact.value",
-                        "Значение контакта обязательно для заполнения"
+                        "validation.contact.value"
                 );
             }
         }

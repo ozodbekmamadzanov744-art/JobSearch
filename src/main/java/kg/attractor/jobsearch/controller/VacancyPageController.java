@@ -110,15 +110,13 @@ public class VacancyPageController {
                          @AuthenticationPrincipal CustomUserDetails userDetails,
                          Model model) {
 
-        // Проверяем, что опыт "от" не больше опыта "до"
         if (dto.getExpFrom() != null
                 && dto.getExpTo() != null
                 && dto.getExpFrom() > dto.getExpTo()) {
 
             bindingResult.rejectValue(
                     "expFrom",
-                    "expFrom.invalid",
-                    "Опыт от не может быть больше чем опыт до"
+                    "validation.vacancy.expRange"
             );
         }
 
@@ -146,7 +144,7 @@ public class VacancyPageController {
 
         if (vacancy.getAuthor() == null || !vacancy.getAuthor().getId().equals(userDetails.getUser().getId())) {
             throw new ForbiddenOperationException(
-                    "Вы не являетесь автором этой вакансии"
+                    "validation.vacancy.owner"
             );
         }
 
@@ -175,15 +173,14 @@ public class VacancyPageController {
                        @AuthenticationPrincipal CustomUserDetails userDetails,
                        Model model) {
 
-        // Проверяем, что опыт "от" не больше опыта "до"
+
         if (dto.getExpFrom() != null
                 && dto.getExpTo() != null
                 && dto.getExpFrom() > dto.getExpTo()) {
 
             bindingResult.rejectValue(
                     "expFrom",
-                    "expFrom.invalid",
-                    "Опыт от не может быть больше чем опыт до"
+                    "validation.vacancy.expRange"
             );
         }
 
@@ -214,7 +211,7 @@ public class VacancyPageController {
 
         if (resume.getApplicant() == null || !resume.getApplicant().getId().equals(userDetails.getUser().getId())) {
             throw new ForbiddenOperationException(
-                    "Нельзя откликнуться чужим резюме"
+                    "validation.vacancy.respondAsOther"
             );
         }
 
@@ -227,6 +224,11 @@ public class VacancyPageController {
         vacancyService.respondToVacancy(id, response);
 
         return "redirect:/pages/vacancies";
+    }
+
+    @GetMapping("/{id}/respond")
+    public String respondGet(@PathVariable Long id) {
+        return "redirect:/pages/vacancies/" + id;
     }
 
     private void addReferenceData(Model model) {
@@ -273,7 +275,7 @@ public class VacancyPageController {
 
         if (vacancy.getAuthor() == null || !vacancy.getAuthor().getId().equals(userDetails.getUser().getId())) {
             throw new ForbiddenOperationException(
-                    "Вы не являетесь автором этой вакансии"
+                    "validation.vacancy.owner"
             );
         }
 
@@ -287,14 +289,7 @@ public class VacancyPageController {
                 .toList();
 
         model.addAttribute("resumes", resumes);
-        model.addAttribute(
-                "pageTitle",
-                "Отклики на вакансию: " + vacancy.getName()
-        );
-        model.addAttribute(
-                "emptyMessage",
-                "Пока никто не откликнулся на эту вакансию."
-        );
+        model.addAttribute("vacancyName", vacancy.getName());
 
         return "resumes/list";
     }

@@ -15,17 +15,17 @@ import java.util.List;
 @AllArgsConstructor
 public class ResumeRequestDto {
 
-    @NotNull(message = "Id соискателя обязателен")
+    @NotNull(message = "{validation.resume.applicantId}")
     private Long applicantId;
 
-    @NotBlank(message = "Название резюме обязательно для заполнения")
+    @NotBlank(message = "{validation.resume.name}")
     private String name;
 
-    @NotNull(message = "Категория обязательна")
+    @NotNull(message = "{validation.resume.category}")
     private Long categoryId;
 
-    @NotNull(message = "Ожидаемая зарплата обязательна")
-    @Positive(message = "Зарплата должна быть положительным числом")
+    @NotNull(message = "{validation.resume.salary}")
+    @Positive(message = "{validation.resume.salary.positive}")
     private Double salary;
 
     private Boolean isActive;

@@ -13,9 +13,9 @@ public class ContactInfoDto {
 
     private Long id;
 
-    @NotNull(message = "Тип контакта обязателен")
+    @NotNull(message = "{validation.contact.type}")
     private Long typeId;
 
-    @NotBlank(message = "Значение контакта обязательно для заполнения")
+    @NotBlank(message = "{validation.contact.value}")
     private String value;
 }
