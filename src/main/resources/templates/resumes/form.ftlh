@@ -11,8 +11,6 @@
     </#assign>
 </#if>
 
-
-
 <@layout.layout title=pageTitle>
     <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -32,7 +30,8 @@
                         </p>
                     </div>
 
-                    <form action="<#if resumeId??>/pages/resumes/${resumeId}/edit<#else>/pages/resumes/create</#if>"
+                    <form id="resume-form"
+                          action="<#if resumeId??>/pages/resumes/${resumeId}/edit<#else>/pages/resumes/create</#if>"
                           method="post">
 
                         <#if _csrf??>
@@ -104,71 +103,82 @@
                             </small>
                         </h5>
 
-                        <#list resumeDto.educationList as edu>
-                            <div class="row g-2 mb-3 border-bottom pb-3">
-                                <div class="col-md-4">
-                                    <@spring.bind "resumeDto.educationList[${edu?index}].institution"/>
+                        <div id="education-list">
+                            <#list resumeDto.educationList as edu>
+                                <div class="row g-2 mb-3 border-bottom pb-3">
+                                    <div class="col-md-4">
+                                        <@spring.bind "resumeDto.educationList[${edu?index}].institution"/>
 
-                                    <input type="text"
-                                           name="educationList[${edu?index}].institution"
-                                           value="${edu.institution!''}"
-                                           class="form-control"
-                                           placeholder="<@spring.message 'resume.form.institution'/>">
+                                        <input type="text"
+                                               name="educationList[${edu?index}].institution"
+                                               value="${edu.institution!''}"
+                                               class="form-control"
+                                               placeholder="<@spring.message 'resume.form.institution'/>">
 
-                                    <@spring.showErrors
-                                    "<br>"
-                                    "text-danger small"/>
+                                        <@spring.showErrors
+                                        "<br>"
+                                        "text-danger small"/>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <@spring.bind "resumeDto.educationList[${edu?index}].program"/>
+
+                                        <input type="text"
+                                               name="educationList[${edu?index}].program"
+                                               value="${edu.program!''}"
+                                               class="form-control"
+                                               placeholder="<@spring.message 'resume.form.program'/>">
+
+                                        <@spring.showErrors
+                                        "<br>"
+                                        "text-danger small"/>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <@spring.bind "resumeDto.educationList[${edu?index}].startDate"/>
+
+                                        <input type="date"
+                                               name="educationList[${edu?index}].startDate"
+                                               value="<#if edu.startDate??>${edu.startDate.toString()}</#if>"
+                                               class="form-control">
+
+                                        <@spring.showErrors
+                                        "<br>"
+                                        "text-danger small"/>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <input type="date"
+                                               name="educationList[${edu?index}].endDate"
+                                               value="<#if edu.endDate??>${edu.endDate.toString()}</#if>"
+                                               class="form-control">
+                                    </div>
+
+                                    <div class="col-md-1">
+                                        <@spring.bind "resumeDto.educationList[${edu?index}].degree"/>
+
+                                        <input type="text"
+                                               name="educationList[${edu?index}].degree"
+                                               value="${edu.degree!''}"
+                                               class="form-control"
+                                               placeholder="<@spring.message 'resume.form.degree'/>">
+
+                                        <@spring.showErrors
+                                        "<br>"
+                                        "text-danger small"/>
+                                    </div>
                                 </div>
+                            </#list>
+                        </div>
 
-                                <div class="col-md-3">
-                                    <@spring.bind "resumeDto.educationList[${edu?index}].program"/>
-
-                                    <input type="text"
-                                           name="educationList[${edu?index}].program"
-                                           value="${edu.program!''}"
-                                           class="form-control"
-                                           placeholder="<@spring.message 'resume.form.program'/>">
-
-                                    <@spring.showErrors
-                                    "<br>"
-                                    "text-danger small"/>
-                                </div>
-
-                                <div class="col-md-2">
-                                    <@spring.bind "resumeDto.educationList[${edu?index}].startDate"/>
-
-                                    <input type="date"
-                                           name="educationList[${edu?index}].startDate"
-                                           value="<#if edu.startDate??>${edu.startDate.toString()}</#if>"
-                                           class="form-control">
-
-                                    <@spring.showErrors
-                                    "<br>"
-                                    "text-danger small"/>
-                                </div>
-
-                                <div class="col-md-2">
-                                    <input type="date"
-                                           name="educationList[${edu?index}].endDate"
-                                           value="<#if edu.endDate??>${edu.endDate.toString()}</#if>"
-                                           class="form-control">
-                                </div>
-
-                                <div class="col-md-1">
-                                    <@spring.bind "resumeDto.educationList[${edu?index}].degree"/>
-
-                                    <input type="text"
-                                           name="educationList[${edu?index}].degree"
-                                           value="${edu.degree!''}"
-                                           class="form-control"
-                                           placeholder="<@spring.message 'resume.form.degree'/>">
-
-                                    <@spring.showErrors
-                                    "<br>"
-                                    "text-danger small"/>
-                                </div>
-                            </div>
-                        </#list>
+                        <#if resumeId??>
+                        <#else>
+                            <button type="button"
+                                    id="add-education"
+                                    class="btn btn-outline-primary btn-sm mb-4">
+                                + Добавить образование
+                            </button>
+                        </#if>
 
                         <h5 class="mb-3">
                             <@spring.message "resume.form.workExperience"/>
@@ -178,65 +188,76 @@
                             </small>
                         </h5>
 
-                        <#list resumeDto.workExperienceList as we>
-                            <div class="row g-2 mb-3 border-bottom pb-3">
-                                <div class="col-md-2">
-                                    <@spring.bind "resumeDto.workExperienceList[${we?index}].years"/>
+                        <div id="work-experience-list">
+                            <#list resumeDto.workExperienceList as we>
+                                <div class="row g-2 mb-3 border-bottom pb-3">
+                                    <div class="col-md-2">
+                                        <@spring.bind "resumeDto.workExperienceList[${we?index}].years"/>
 
-                                    <input type="number"
-                                           name="workExperienceList[${we?index}].years"
-                                           value="${we.years!''}"
-                                           class="form-control"
-                                           placeholder="<@spring.message 'resume.form.years'/>">
+                                        <input type="number"
+                                               name="workExperienceList[${we?index}].years"
+                                               value="${we.years!''}"
+                                               class="form-control"
+                                               placeholder="<@spring.message 'resume.form.years'/>">
 
-                                    <@spring.showErrors
-                                    "<br>"
-                                    "text-danger small"/>
+                                        <@spring.showErrors
+                                        "<br>"
+                                        "text-danger small"/>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <@spring.bind "resumeDto.workExperienceList[${we?index}].companyName"/>
+
+                                        <input type="text"
+                                               name="workExperienceList[${we?index}].companyName"
+                                               value="${we.companyName!''}"
+                                               class="form-control"
+                                               placeholder="<@spring.message 'resume.form.company'/>">
+
+                                        <@spring.showErrors
+                                        "<br>"
+                                        "text-danger small"/>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <@spring.bind "resumeDto.workExperienceList[${we?index}].position"/>
+
+                                        <input type="text"
+                                               name="workExperienceList[${we?index}].position"
+                                               value="${we.position!''}"
+                                               class="form-control"
+                                               placeholder="<@spring.message 'resume.form.position'/>">
+
+                                        <@spring.showErrors
+                                        "<br>"
+                                        "text-danger small"/>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <@spring.bind "resumeDto.workExperienceList[${we?index}].responsibilities"/>
+
+                                        <input type="text"
+                                               name="workExperienceList[${we?index}].responsibilities"
+                                               value="${we.responsibilities!''}"
+                                               class="form-control"
+                                               placeholder="<@spring.message 'resume.form.responsibilities'/>">
+
+                                        <@spring.showErrors
+                                        "<br>"
+                                        "text-danger small"/>
+                                    </div>
                                 </div>
+                            </#list>
+                        </div>
 
-                                <div class="col-md-3">
-                                    <@spring.bind "resumeDto.workExperienceList[${we?index}].companyName"/>
-
-                                    <input type="text"
-                                           name="workExperienceList[${we?index}].companyName"
-                                           value="${we.companyName!''}"
-                                           class="form-control"
-                                           placeholder="<@spring.message 'resume.form.company'/>">
-
-                                    <@spring.showErrors
-                                    "<br>"
-                                    "text-danger small"/>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <@spring.bind "resumeDto.workExperienceList[${we?index}].position"/>
-
-                                    <input type="text"
-                                           name="workExperienceList[${we?index}].position"
-                                           value="${we.position!''}"
-                                           class="form-control"
-                                           placeholder="<@spring.message 'resume.form.position'/>">
-
-                                    <@spring.showErrors
-                                    "<br>"
-                                    "text-danger small"/>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <@spring.bind "resumeDto.workExperienceList[${we?index}].responsibilities"/>
-
-                                    <input type="text"
-                                           name="workExperienceList[${we?index}].responsibilities"
-                                           value="${we.responsibilities!''}"
-                                           class="form-control"
-                                           placeholder="<@spring.message 'resume.form.responsibilities'/>">
-
-                                    <@spring.showErrors
-                                    "<br>"
-                                    "text-danger small"/>
-                                </div>
-                            </div>
-                        </#list>
+                        <#if resumeId??>
+                        <#else>
+                            <button type="button"
+                                    id="add-work-experience"
+                                    class="btn btn-outline-primary btn-sm mb-4">
+                                + Добавить опыт работы
+                            </button>
+                        </#if>
 
                         <h5 class="mb-3">
                             <@spring.message "resume.form.contacts"/>
@@ -284,4 +305,8 @@
             </div>
         </div>
     </div>
+    <#if resumeId??>
+    <#else>
+        <script src="/js/resume-form.js"></script>
+    </#if>
 </@layout.layout>
