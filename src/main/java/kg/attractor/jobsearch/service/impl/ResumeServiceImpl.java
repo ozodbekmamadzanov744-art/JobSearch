@@ -35,6 +35,7 @@ public class ResumeServiceImpl implements ResumeService {
     private final RespondedApplicantRepository respondedApplicantRepository;
 
     @Override
+    @Transactional
     public Resume createResume(Resume resume, List<EducationInfo> educationList,
                                List<WorkExperienceInfo> workExperienceList, List<ContactInfo> contactList) {
         Long applicantId = resume.getApplicant() != null ? resume.getApplicant().getId() : null;

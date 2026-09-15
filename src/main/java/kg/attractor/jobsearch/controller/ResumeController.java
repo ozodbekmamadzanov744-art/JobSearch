@@ -13,6 +13,7 @@ import kg.attractor.jobsearch.service.ResumeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import kg.attractor.jobsearch.model.User;
 
 import java.util.List;
 import java.util.Objects;
@@ -28,9 +29,23 @@ public class ResumeController {
     }
 
     @PostMapping
-    public ResponseEntity<ResumeResponseDto> createResume(@Valid @RequestBody ResumeRequestDto dto) {
+    public ResponseEntity<ResumeResponseDto> createResume(
+            @Valid @RequestBody ResumeRequestDto dto,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
         Resume resume = ResumeMapper.toModel(dto);
-        Resume saved = resumeService.createResume(resume, mapEducation(dto), mapWorkExperience(dto), mapContacts(dto));
+
+        User applicant = new User();
+        applicant.setId(userDetails.getUser().getId());
+        resume.setApplicant(applicant);
+
+        Resume saved = resumeService.createResume(
+                resume,
+                mapEducation(dto),
+                mapWorkExperience(dto),
+                mapContacts(dto)
+        );
+
         return ResponseEntity.ok(toFullDto(saved));
     }
 

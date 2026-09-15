@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ResumeRequestDto {
 
-    @NotNull(message = "{validation.resume.applicantId}")
+
     private Long applicantId;
 
     @NotBlank(message = "{validation.resume.name}")
