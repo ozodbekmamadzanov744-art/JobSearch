@@ -67,8 +67,6 @@ public class ResumePageController {
     public String createForm(Model model) {
         ResumeFormDto dto = new ResumeFormDto();
 
-        padTo3(dto.getEducationList(), EducationInfoDto::new);
-        padTo3(dto.getWorkExperienceList(), WorkExperienceInfoDto::new);
         padTo3(dto.getContactList(), ContactInfoDto::new);
 
         model.addAttribute("resumeDto", dto);
@@ -229,7 +227,6 @@ public class ResumePageController {
             if (!notBlank(education.getInstitution())) {
                 bindingResult.rejectValue(
                         "educationList[" + i + "].institution",
-                        "education.institution",
                         "validation.education.institution"
                 );
             }
@@ -237,7 +234,6 @@ public class ResumePageController {
             if (!notBlank(education.getProgram())) {
                 bindingResult.rejectValue(
                         "educationList[" + i + "].program",
-                        "education.program",
                         "validation.education.program"
                 );
             }
@@ -245,7 +241,6 @@ public class ResumePageController {
             if (education.getStartDate() == null) {
                 bindingResult.rejectValue(
                         "educationList[" + i + "].startDate",
-                        "education.startDate",
                         "validation.education.startDate"
                 );
             }
@@ -253,7 +248,6 @@ public class ResumePageController {
             if (!notBlank(education.getDegree())) {
                 bindingResult.rejectValue(
                         "educationList[" + i + "].degree",
-                        "education.degree",
                         "validation.education.degree"
                 );
             }
@@ -279,13 +273,11 @@ public class ResumePageController {
             if (experience.getYears() == null) {
                 bindingResult.rejectValue(
                         "workExperienceList[" + i + "].years",
-                        "experience.years",
                         "validation.workExperience.years"
                 );
             } else if (experience.getYears() < 0) {
                 bindingResult.rejectValue(
                         "workExperienceList[" + i + "].years",
-                        "experience.years",
                         "validation.workExperience.years.positive"
                 );
             }
@@ -293,7 +285,6 @@ public class ResumePageController {
             if (!notBlank(experience.getCompanyName())) {
                 bindingResult.rejectValue(
                         "workExperienceList[" + i + "].companyName",
-                        "experience.companyName",
                         "validation.workExperience.company"
                 );
             }
@@ -301,7 +292,6 @@ public class ResumePageController {
             if (!notBlank(experience.getPosition())) {
                 bindingResult.rejectValue(
                         "workExperienceList[" + i + "].position",
-                        "experience.position",
                         "validation.workExperience.position"
                 );
             }
@@ -309,7 +299,6 @@ public class ResumePageController {
             if (!notBlank(experience.getResponsibilities())) {
                 bindingResult.rejectValue(
                         "workExperienceList[" + i + "].responsibilities",
-                        "experience.responsibilities",
                         "validation.workExperience.responsibilities"
                 );
             }
@@ -334,7 +323,6 @@ public class ResumePageController {
             if (contact.getTypeId() == null) {
                 bindingResult.rejectValue(
                         "contactList[" + i + "].typeId",
-                        "contact.typeId",
                         "validation.contact.type"
                 );
             }
@@ -342,7 +330,6 @@ public class ResumePageController {
             if (!notBlank(contact.getValue())) {
                 bindingResult.rejectValue(
                         "contactList[" + i + "].value",
-                        "contact.value",
                         "validation.contact.value"
                 );
             }

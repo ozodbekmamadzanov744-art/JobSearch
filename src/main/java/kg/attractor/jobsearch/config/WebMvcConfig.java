@@ -7,10 +7,9 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
-import java.time.Duration;
 import java.util.Locale;
 
 @Configuration
@@ -18,12 +17,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Bean
     public LocaleResolver localeResolver() {
-        CookieLocaleResolver localeResolver =
-                new CookieLocaleResolver("jobSearchLocale");
-
+        SessionLocaleResolver localeResolver = new SessionLocaleResolver();
         localeResolver.setDefaultLocale(Locale.forLanguageTag("ru"));
-        localeResolver.setCookieMaxAge(Duration.ofDays(365));
-        localeResolver.setCookiePath("/");
 
         return localeResolver;
     }
