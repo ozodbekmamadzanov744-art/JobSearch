@@ -19,6 +19,8 @@ public interface VacancyService {
 
     List<Vacancy> getAllActiveVacancies();
 
+    List<Vacancy> getAllActiveVacancies(String sortBy);
+
     List<Vacancy> getVacanciesByCategory(Long categoryId);
 
     List<Vacancy> getVacanciesByAuthor(Long authorId);

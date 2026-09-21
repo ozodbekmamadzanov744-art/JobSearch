@@ -158,4 +158,30 @@ public class VacancyServiceImpl implements VacancyService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "createdDate"));
         return vacancyRepository.findByAuthorId(authorId, pageable);
     }
+
+    @Override
+    public List<Vacancy> getAllActiveVacancies(String sortBy) {
+        if (SORT_BY_RESPONSES.equals(sortBy)
+                || SORT_BY_RESPONSES_DESC.equals(sortBy)) {
+            return vacancyRepository
+                    .findActiveOrderByResponseCountDesc(Pageable.unpaged())
+                    .getContent();
+        }
+
+        if (SORT_BY_RESPONSES_ASC.equals(sortBy)) {
+            return vacancyRepository
+                    .findActiveOrderByResponseCountAsc(Pageable.unpaged())
+                    .getContent();
+        }
+
+        Sort.Direction direction = SORT_BY_DATE_ASC.equals(sortBy)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        return vacancyRepository
+                .findByIsActiveTrue(
+                        Pageable.unpaged(Sort.by(direction, "createdDate"))
+                )
+                .getContent();
+    }
 }

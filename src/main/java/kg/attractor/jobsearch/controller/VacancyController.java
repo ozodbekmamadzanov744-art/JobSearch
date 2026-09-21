@@ -57,10 +57,15 @@ public class VacancyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<VacancyResponseDto>> getAllActiveVacancies() {
-        List<VacancyResponseDto> result = vacancyService.getAllActiveVacancies().stream()
+    public ResponseEntity<List<VacancyResponseDto>> getAllActiveVacancies(
+            @RequestParam(defaultValue = "date_desc") String sort) {
+
+        List<VacancyResponseDto> result = vacancyService
+                .getAllActiveVacancies(sort)
+                .stream()
                 .map(VacancyMapper::toDto)
                 .toList();
+
         return ResponseEntity.ok(result);
     }
 
