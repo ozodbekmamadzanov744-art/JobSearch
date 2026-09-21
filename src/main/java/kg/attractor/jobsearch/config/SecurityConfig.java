@@ -69,6 +69,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/pages/vacancies/*/edit").hasRole("EMPLOYER")
                         .requestMatchers(HttpMethod.POST, "/pages/vacancies/*/respond").hasRole("APPLICANT")
 
+                        .requestMatchers("/js/**", "/styles/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)
