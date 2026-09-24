@@ -10,8 +10,11 @@ import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
 import kg.attractor.jobsearch.security.CustomUserDetails;
 import kg.attractor.jobsearch.service.ResumeService;
+import kg.attractor.jobsearch.util.ResumeValidationUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import kg.attractor.jobsearch.model.User;
 
@@ -31,7 +34,10 @@ public class ResumeController {
     @PostMapping
     public ResponseEntity<ResumeResponseDto> createResume(
             @Valid @RequestBody ResumeRequestDto dto,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            BindingResult bindingResult,
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws BindException {
+
+        validateResumeRequest(dto, bindingResult);
 
         Resume resume = ResumeMapper.toModel(dto);
 
@@ -50,8 +56,12 @@ public class ResumeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResumeResponseDto> updateResume(@PathVariable Long id, @Valid @RequestBody ResumeRequestDto dto,
-                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<ResumeResponseDto> updateResume(@PathVariable Long id,
+                                                          @Valid @RequestBody ResumeRequestDto dto,
+                                                          BindingResult bindingResult,
+                                                          @AuthenticationPrincipal CustomUserDetails userDetails) throws BindException {
+        validateResumeRequest(dto, bindingResult);
+
         Resume resume = ResumeMapper.toModel(dto);
         Resume updated = resumeService.updateResume(id, resume, mapEducation(dto), mapWorkExperience(dto), mapContacts(dto),
                 userDetails.getUser().getId());
@@ -82,6 +92,18 @@ public class ResumeController {
     @GetMapping("/applicant/{applicantId}")
     public ResponseEntity<List<ResumeResponseDto>> getResumesByApplicant(@PathVariable Long applicantId) {
         return ResponseEntity.ok(resumeService.getResumesByApplicant(applicantId).stream().map(this::toFullDto).toList());
+    }
+
+    private void validateResumeRequest(ResumeRequestDto dto,
+                                       BindingResult bindingResult) throws BindException {
+        ResumeValidationUtils.validateEducationDates(
+                dto.getEducationList(),
+                bindingResult
+        );
+
+        if (bindingResult.hasErrors()) {
+            throw new BindException(bindingResult);
+        }
     }
 
     private List<EducationInfo> mapEducation(ResumeRequestDto dto) {

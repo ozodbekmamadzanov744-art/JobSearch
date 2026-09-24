@@ -17,6 +17,7 @@ import kg.attractor.jobsearch.security.CustomUserDetails;
 import kg.attractor.jobsearch.service.CategoryService;
 import kg.attractor.jobsearch.service.ContactTypeService;
 import kg.attractor.jobsearch.service.ResumeService;
+import kg.attractor.jobsearch.util.ResumeValidationUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -30,16 +31,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 @Controller
 @RequestMapping("/pages/resumes")
 public class ResumePageController {
-
-    private static final int EMPTY_ROWS = 3;
 
     private final ResumeService resumeService;
     private final CategoryService categoryService;
@@ -66,8 +65,6 @@ public class ResumePageController {
     @GetMapping("/create")
     public String createForm(Model model) {
         ResumeFormDto dto = new ResumeFormDto();
-
-        padTo3(dto.getContactList(), ContactInfoDto::new);
 
         model.addAttribute("resumeDto", dto);
         addReferenceData(model);
@@ -144,10 +141,6 @@ public class ResumePageController {
                         .toList()
         );
 
-        padTo3(education, EducationInfoDto::new);
-        padTo3(experience, WorkExperienceInfoDto::new);
-        padTo3(contacts, ContactInfoDto::new);
-
         dto.setEducationList(education);
         dto.setWorkExperienceList(experience);
         dto.setContactList(contacts);
@@ -205,6 +198,10 @@ public class ResumePageController {
                                           BindingResult bindingResult) {
 
         validateEducation(dto.getEducationList(), bindingResult);
+        ResumeValidationUtils.validateEducationDates(
+                dto.getEducationList(),
+                bindingResult
+        );
         validateWorkExperience(dto.getWorkExperienceList(), bindingResult);
         validateContacts(dto.getContactList(), bindingResult);
     }
@@ -408,7 +405,7 @@ public class ResumePageController {
 
     private List<EducationInfo> filterEducation(ResumeFormDto dto) {
 
-        return dto.getEducationList()
+        return educationList(dto)
                 .stream()
                 .filter(e ->
                         notBlank(e.getInstitution())
@@ -422,7 +419,7 @@ public class ResumePageController {
 
     private List<WorkExperienceInfo> filterExperience(ResumeFormDto dto) {
 
-        return dto.getWorkExperienceList()
+        return workExperienceList(dto)
                 .stream()
                 .filter(w ->
                         notBlank(w.getCompanyName())
@@ -436,7 +433,7 @@ public class ResumePageController {
 
     private List<ContactInfo> filterContacts(ResumeFormDto dto) {
 
-        return dto.getContactList()
+        return contactList(dto)
                 .stream()
                 .filter(c ->
                         c.getTypeId() != null
@@ -450,10 +447,21 @@ public class ResumePageController {
         return value != null && !value.isBlank();
     }
 
-    private <T> void padTo3(List<T> list, Supplier<T> supplier) {
+    private List<EducationInfoDto> educationList(ResumeFormDto dto) {
+        return dto.getEducationList() == null
+                ? Collections.emptyList()
+                : dto.getEducationList();
+    }
 
-        while (list.size() < EMPTY_ROWS) {
-            list.add(supplier.get());
-        }
+    private List<WorkExperienceInfoDto> workExperienceList(ResumeFormDto dto) {
+        return dto.getWorkExperienceList() == null
+                ? Collections.emptyList()
+                : dto.getWorkExperienceList();
+    }
+
+    private List<ContactInfoDto> contactList(ResumeFormDto dto) {
+        return dto.getContactList() == null
+                ? Collections.emptyList()
+                : dto.getContactList();
     }
 }

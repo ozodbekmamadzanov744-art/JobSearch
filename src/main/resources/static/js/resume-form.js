@@ -2,250 +2,498 @@
 
 window.addEventListener('load', function () {
     const form = document.getElementById('resume-form');
-
     const educationList = document.getElementById('education-list');
     const workExperienceList =
         document.getElementById('work-experience-list');
+    const contactList = document.getElementById('contact-list');
+    const contactTypeOptions =
+        document.getElementById('contact-type-options').innerHTML.trim();
+    const labels = form.dataset;
+    const submitButton = form.querySelector('[type="submit"]');
 
-    const addEducationButton =
-        document.getElementById('add-education');
+    const now = new Date();
+    const today = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, '0'),
+        String(now.getDate()).padStart(2, '0')
+    ].join('-');
 
-    const addWorkExperienceButton =
-        document.getElementById('add-work-experience');
-
-    let educationIndex = 0;
-    let workExperienceIndex = 0;
-
-    addEducationButton.addEventListener('click', function () {
-        const educationBlock = document.createElement('div');
-
-        educationBlock.className =
-            'education-item border rounded p-3 mb-3';
-
-        educationBlock.innerHTML = `
-            <div class="row g-2">
-                <div class="col-md-4">
-                    <input type="text"
-                           name="educationList[${educationIndex}].institution"
-                           data-field="institution"
-                           class="form-control"
-                           placeholder="Учебное заведение">
-                </div>
-
-                <div class="col-md-3">
-                    <input type="text"
-                           name="educationList[${educationIndex}].program"
-                           data-field="program"
-                           class="form-control"
-                           placeholder="Программа">
-                </div>
-
-                <div class="col-md-2">
-                    <input type="date"
-                           name="educationList[${educationIndex}].startDate"
-                           data-field="startDate"
-                           class="form-control">
-                </div>
-
-                <div class="col-md-2">
-                    <input type="date"
-                           name="educationList[${educationIndex}].endDate"
-                           data-field="endDate"
-                           class="form-control">
-                </div>
-
-                <div class="col-md-12">
-                    <input type="text"
-                           name="educationList[${educationIndex}].degree"
-                           data-field="degree"
-                           class="form-control"
-                           placeholder="Степень">
-                </div>
-
-                <div class="col-md-12">
-                    <button type="button"
-                            class="btn btn-outline-danger btn-sm remove-block">
-                        Удалить
-                    </button>
-                </div>
-            </div>
-        `;
-
-        const removeButton =
-            educationBlock.querySelector('.remove-block');
-
-        removeButton.addEventListener('click', function () {
-            educationBlock.remove();
-        });
-
-        educationList.append(educationBlock);
-        educationIndex++;
+    document.querySelectorAll('input[type="date"]').forEach(function (input) {
+        input.max = today;
     });
 
-    addWorkExperienceButton.addEventListener('click', function () {
-        const workExperienceBlock = document.createElement('div');
+    function setDateLimits(item) {
+        item.querySelectorAll('input[type="date"]').forEach(function (input) {
+            input.max = today;
+        });
+    }
 
-        workExperienceBlock.className =
-            'work-experience-item border rounded p-3 mb-3';
+    function clearDateValidity(item) {
+        item.querySelectorAll('input[type="date"]').forEach(function (input) {
+            input.setCustomValidity('');
+        });
+    }
 
-        workExperienceBlock.innerHTML = `
-            <div class="row g-2">
-                <div class="col-md-2">
-                    <input type="number"
-                           min="0"
-                           name="workExperienceList[${workExperienceIndex}].years"
-                           data-field="years"
-                           class="form-control"
-                           placeholder="Лет">
-                </div>
-
-                <div class="col-md-3">
-                    <input type="text"
-                           name="workExperienceList[${workExperienceIndex}].companyName"
-                           data-field="companyName"
-                           class="form-control"
-                           placeholder="Компания">
-                </div>
-
-                <div class="col-md-3">
-                    <input type="text"
-                           name="workExperienceList[${workExperienceIndex}].position"
-                           data-field="position"
-                           class="form-control"
-                           placeholder="Должность">
-                </div>
-
-                <div class="col-md-4">
-                    <input type="text"
-                           name="workExperienceList[${workExperienceIndex}].responsibilities"
-                           data-field="responsibilities"
-                           class="form-control"
-                           placeholder="Обязанности">
-                </div>
-
-                <div class="col-md-12">
-                    <button type="button"
-                            class="btn btn-outline-danger btn-sm remove-block">
-                        Удалить
-                    </button>
-                </div>
-            </div>
-        `;
-
-        const removeButton =
-            workExperienceBlock.querySelector('.remove-block');
-
-        removeButton.addEventListener('click', function () {
-            workExperienceBlock.remove();
+    function clearServerErrors() {
+        form.querySelectorAll('.ajax-error').forEach(function (error) {
+            error.remove();
         });
 
-        workExperienceList.append(workExperienceBlock);
-        workExperienceIndex++;
-    });
+        form.querySelectorAll('.is-invalid').forEach(function (field) {
+            field.classList.remove('is-invalid');
+        });
+    }
 
-    function getEducationList() {
-        const educationItems =
-            document.querySelectorAll('.education-item');
+    function findField(name) {
+        return Array.from(form.querySelectorAll('[name]'))
+            .find(function (field) {
+                return field.name === name;
+            });
+    }
 
-        const result = [];
+    function showFieldError(field, message) {
+        field.classList.add('is-invalid');
 
-        educationItems.forEach(function (item) {
-            result.push({
-                institution:
-                item.querySelector('[data-field="institution"]').value,
-                program:
-                item.querySelector('[data-field="program"]').value,
-                startDate:
-                item.querySelector('[data-field="startDate"]').value,
-                endDate:
-                    item.querySelector('[data-field="endDate"]').value || null,
-                degree:
-                item.querySelector('[data-field="degree"]').value
+        const error = document.createElement('div');
+        error.className = 'invalid-feedback d-block ajax-error';
+        error.textContent = message;
+
+        field.insertAdjacentElement('afterend', error);
+    }
+
+    function showFormError(message) {
+        const error = document.createElement('div');
+        error.className = 'alert alert-danger ajax-error';
+        error.textContent = message;
+
+        form.prepend(error);
+    }
+
+    function showServerErrors(errorBody) {
+        clearServerErrors();
+
+        if (!errorBody || !errorBody.fieldErrors) {
+            showFormError(errorBody && errorBody.message
+                ? errorBody.message
+                : labels.requestErrorMessage);
+            return;
+        }
+
+        Object.entries(errorBody.fieldErrors).forEach(function ([fieldName, message]) {
+            const field = findField(fieldName);
+
+            if (field) {
+                showFieldError(field, message);
+            } else {
+                showFormError(message);
+            }
+        });
+    }
+
+    function setSubmitting(isSubmitting) {
+        if (submitButton) {
+            submitButton.disabled = isSubmitting;
+        }
+    }
+
+    function validateEducationDates() {
+        let valid = true;
+
+        document.querySelectorAll('.education-item').forEach(function (item) {
+            clearDateValidity(item);
+
+            const startDate = item.querySelector('[data-field="startDate"]');
+            const endDate = item.querySelector('[data-field="endDate"]');
+
+            if (!startDate || !endDate) {
+                return;
+            }
+
+            if (startDate.value && startDate.value > today) {
+                startDate.setCustomValidity(
+                    labels.startDateFutureMessage
+                );
+                valid = false;
+            }
+
+            if (endDate.value && endDate.value > today) {
+                endDate.setCustomValidity(
+                    labels.endDateFutureMessage
+                );
+                valid = false;
+            }
+
+            if (startDate.value && endDate.value
+                && endDate.value < startDate.value) {
+                endDate.setCustomValidity(
+                    labels.dateRangeMessage
+                );
+                valid = false;
+            }
+        });
+
+        return valid;
+    }
+
+    function reindexItems(selector, listName) {
+        document.querySelectorAll(selector).forEach(function (item, index) {
+            item.querySelectorAll('[name]').forEach(function (field) {
+                field.name = field.name.replace(
+                    new RegExp(listName + '\\[\\d+\\]'),
+                    listName + '[' + index + ']'
+                );
             });
         });
+    }
 
-        return result;
+    function reindexAll() {
+        reindexItems('.education-item', 'educationList');
+        reindexItems('.work-experience-item', 'workExperienceList');
+        reindexItems('.contact-item', 'contactList');
+    }
+
+    function trimValue(item, fieldName) {
+        const field = item.querySelector('[name$=".' + fieldName + '"]');
+        return field ? field.value.trim() : '';
+    }
+
+    function fieldValue(item, fieldName) {
+        const field = item.querySelector('[name$=".' + fieldName + '"]');
+        return field ? field.value : '';
+    }
+
+    function hasEducationValue(item) {
+        return trimValue(item, 'institution') !== ''
+            || trimValue(item, 'program') !== ''
+            || fieldValue(item, 'startDate') !== ''
+            || fieldValue(item, 'endDate') !== ''
+            || trimValue(item, 'degree') !== '';
+    }
+
+    function hasWorkExperienceValue(item) {
+        return fieldValue(item, 'years') !== ''
+            || trimValue(item, 'companyName') !== ''
+            || trimValue(item, 'position') !== ''
+            || trimValue(item, 'responsibilities') !== '';
+    }
+
+    function hasContactValue(item) {
+        return trimValue(item, 'value') !== '';
+    }
+
+    function removeEmptyBlocks() {
+        document.querySelectorAll('.education-item').forEach(function (item) {
+            if (!hasEducationValue(item)) {
+                item.remove();
+            }
+        });
+
+        document.querySelectorAll('.work-experience-item').forEach(function (item) {
+            if (!hasWorkExperienceValue(item)) {
+                item.remove();
+            }
+        });
+
+        document.querySelectorAll('.contact-item').forEach(function (item) {
+            if (!hasContactValue(item)) {
+                item.remove();
+            }
+        });
+    }
+
+    function getEducationList() {
+        return Array.from(document.querySelectorAll('.education-item'))
+            .filter(hasEducationValue)
+            .map(function (item) {
+                return {
+                    institution: trimValue(item, 'institution'),
+                    program: trimValue(item, 'program'),
+                    startDate: fieldValue(item, 'startDate') || null,
+                    endDate: fieldValue(item, 'endDate') || null,
+                    degree: trimValue(item, 'degree')
+                };
+            });
     }
 
     function getWorkExperienceList() {
-        const workExperienceItems =
-            document.querySelectorAll('.work-experience-item');
+        return Array.from(document.querySelectorAll('.work-experience-item'))
+            .filter(hasWorkExperienceValue)
+            .map(function (item) {
+                const years = fieldValue(item, 'years');
 
-        const result = [];
-
-        workExperienceItems.forEach(function (item) {
-            const years =
-                item.querySelector('[data-field="years"]').value;
-
-            result.push({
-                years: years === '' ? null : Number(years),
-                companyName:
-                item.querySelector('[data-field="companyName"]').value,
-                position:
-                item.querySelector('[data-field="position"]').value,
-                responsibilities:
-                item.querySelector('[data-field="responsibilities"]').value
+                return {
+                    years: years === '' ? null : Number(years),
+                    companyName: trimValue(item, 'companyName'),
+                    position: trimValue(item, 'position'),
+                    responsibilities: trimValue(item, 'responsibilities')
+                };
             });
-        });
-
-        return result;
     }
 
-    function getContactList(formData) {
-        const result = [];
+    function getContactList() {
+        return Array.from(document.querySelectorAll('.contact-item'))
+            .filter(hasContactValue)
+            .map(function (item) {
+                const typeId = fieldValue(item, 'typeId');
 
-        for (let i = 0; i < 3; i++) {
-            const typeId =
-                formData.get(`contactList[${i}].typeId`);
-
-            const value =
-                formData.get(`contactList[${i}].value`);
-
-            if (typeId && value && value.trim() !== '') {
-                result.push({
-                    typeId: Number(typeId),
-                    value: value
-                });
-            }
-        }
-
-        return result;
+                return {
+                    typeId: typeId === '' ? null : Number(typeId),
+                    value: trimValue(item, 'value')
+                };
+            });
     }
 
-    form.addEventListener('submit', async function (event) {
-        event.preventDefault();
+    function getNumber(formData, fieldName) {
+        const value = formData.get(fieldName);
+        return value === null || value === '' ? null : Number(value);
+    }
 
+    function getResumePayload() {
         const formData = new FormData(form);
 
-        const resume = {
+        return {
             name: formData.get('name'),
-            categoryId: Number(formData.get('categoryId')),
-            salary: Number(formData.get('salary')),
+            categoryId: getNumber(formData, 'categoryId'),
+            salary: getNumber(formData, 'salary'),
             isActive: formData.get('isActive') !== null,
             educationList: getEducationList(),
             workExperienceList: getWorkExperienceList(),
-            contactList: getContactList(formData)
+            contactList: getContactList()
         };
+    }
 
-        try {
-            const response = await fetch('/resumes', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json;charset=utf-8'
-                },
-                body: JSON.stringify(resume)
-            });
+    function bindRemoveButtons(container) {
+        container.addEventListener('click', function (event) {
+            const button = event.target.closest('.remove-block');
 
-            if (!response.ok) {
-                throw new Error('Не удалось сохранить резюме');
+            if (!button) {
+                return;
             }
 
-            await response.json();
+            button.closest('.education-item, .work-experience-item, .contact-item')
+                .remove();
+            reindexAll();
+        });
+    }
 
-            window.location.href = '/pages/cabinet';
+    function addEducationBlock() {
+        const educationBlock = document.createElement('div');
+
+        educationBlock.className =
+            'education-item row g-2 mb-3 border-bottom pb-3';
+
+        educationBlock.innerHTML = `
+            <div class="col-md-4">
+                <input type="text"
+                       name="educationList[0].institution"
+                       data-field="institution"
+                       class="form-control"
+                       placeholder="${labels.institutionPlaceholder}">
+            </div>
+
+            <div class="col-md-3">
+                <input type="text"
+                       name="educationList[0].program"
+                       data-field="program"
+                       class="form-control"
+                       placeholder="${labels.programPlaceholder}">
+            </div>
+
+            <div class="col-md-2">
+                <input type="date"
+                       name="educationList[0].startDate"
+                       data-field="startDate"
+                       class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <input type="date"
+                       name="educationList[0].endDate"
+                       data-field="endDate"
+                       class="form-control">
+            </div>
+
+            <div class="col-md-1">
+                <input type="text"
+                       name="educationList[0].degree"
+                       data-field="degree"
+                       class="form-control"
+                       placeholder="${labels.degreePlaceholder}">
+            </div>
+
+            <div class="col-md-12">
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm remove-block">
+                    ${labels.removeLabel}
+                </button>
+            </div>
+        `;
+
+        setDateLimits(educationBlock);
+        educationList.append(educationBlock);
+        reindexAll();
+    }
+
+    function addWorkExperienceBlock() {
+        const workExperienceBlock = document.createElement('div');
+
+        workExperienceBlock.className =
+            'work-experience-item row g-2 mb-3 border-bottom pb-3';
+
+        workExperienceBlock.innerHTML = `
+            <div class="col-md-2">
+                <input type="number"
+                       min="0"
+                       name="workExperienceList[0].years"
+                       data-field="years"
+                       class="form-control"
+                       placeholder="${labels.yearsPlaceholder}">
+            </div>
+
+            <div class="col-md-3">
+                <input type="text"
+                       name="workExperienceList[0].companyName"
+                       data-field="companyName"
+                       class="form-control"
+                       placeholder="${labels.companyPlaceholder}">
+            </div>
+
+            <div class="col-md-3">
+                <input type="text"
+                       name="workExperienceList[0].position"
+                       data-field="position"
+                       class="form-control"
+                       placeholder="${labels.positionPlaceholder}">
+            </div>
+
+            <div class="col-md-4">
+                <input type="text"
+                       name="workExperienceList[0].responsibilities"
+                       data-field="responsibilities"
+                       class="form-control"
+                       placeholder="${labels.responsibilitiesPlaceholder}">
+            </div>
+
+            <div class="col-md-12">
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm remove-block">
+                    ${labels.removeLabel}
+                </button>
+            </div>
+        `;
+
+        workExperienceList.append(workExperienceBlock);
+        reindexAll();
+    }
+
+    function addContactBlock() {
+        const contactBlock = document.createElement('div');
+
+        contactBlock.className = 'contact-item row g-2 mb-3';
+
+        contactBlock.innerHTML = `
+            <div class="col-md-4">
+                <select name="contactList[0].typeId"
+                        class="form-select">
+                    ${contactTypeOptions}
+                </select>
+            </div>
+
+            <div class="col-md-7">
+                <input type="text"
+                       name="contactList[0].value"
+                       class="form-control"
+                       placeholder="${labels.contactValuePlaceholder}">
+            </div>
+
+            <div class="col-md-1">
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm remove-block">
+                    ${labels.removeLabel}
+                </button>
+            </div>
+        `;
+
+        contactList.append(contactBlock);
+        reindexAll();
+    }
+
+    bindRemoveButtons(educationList);
+    bindRemoveButtons(workExperienceList);
+    bindRemoveButtons(contactList);
+
+    document.getElementById('add-education')
+        .addEventListener('click', addEducationBlock);
+
+    document.getElementById('add-work-experience')
+        .addEventListener('click', addWorkExperienceBlock);
+
+    document.getElementById('add-contact')
+        .addEventListener('click', addContactBlock);
+
+    form.addEventListener('input', validateEducationDates);
+    form.addEventListener('change', validateEducationDates);
+
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        removeEmptyBlocks();
+        reindexAll();
+        clearServerErrors();
+
+        if (!validateEducationDates()) {
+            form.reportValidity();
+            return;
+        }
+
+        setSubmitting(true);
+
+        const headers = {
+            'Content-Type': 'application/json;charset=utf-8'
+        };
+
+        if (labels.csrfHeader && labels.csrfToken) {
+            headers[labels.csrfHeader] = labels.csrfToken;
+        }
+
+        let shouldUnlock = true;
+
+        try {
+            const response = await fetch(labels.apiUrl, {
+                method: labels.apiMethod,
+                headers: headers,
+                body: JSON.stringify(getResumePayload())
+            });
+
+            if (response.ok) {
+                shouldUnlock = false;
+                window.location.href = labels.successUrl;
+                return;
+            }
+
+            let errorBody = null;
+
+            try {
+                errorBody = await response.json();
+            } catch (error) {
+                errorBody = null;
+            }
+
+            showServerErrors(errorBody);
+
+            const firstInvalid = form.querySelector('.is-invalid');
+
+            if (firstInvalid) {
+                firstInvalid.focus();
+            }
         } catch (error) {
-            console.log(error);
-            alert(error.message);
+            clearServerErrors();
+            showFormError(labels.requestErrorMessage);
+        } finally {
+            if (shouldUnlock) {
+                setSubmitting(false);
+            }
         }
     });
+
+    reindexAll();
 });
