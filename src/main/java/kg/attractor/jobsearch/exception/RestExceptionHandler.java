@@ -10,10 +10,13 @@ import kg.attractor.jobsearch.dto.ErrorResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -60,13 +63,12 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        Map<String, String> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
-                .collect(Collectors.toMap(
-                        error -> error.getField(),
-                        error -> error.getDefaultMessage() == null ? resolve("error.validation.field") : resolveError(error.getDefaultMessage()),
-                        (first, second) -> first,
-                        LinkedHashMap::new));
-        return buildResponse(HttpStatus.BAD_REQUEST, resolve("error.validation"), fieldErrors, request);
+        return buildValidationResponse(ex.getBindingResult(), request);
+    }
+
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ErrorResponseDto> handleBindException(BindException ex, HttpServletRequest request) {
+        return buildValidationResponse(ex.getBindingResult(), request);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -94,6 +96,17 @@ public class RestExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 
+    private ResponseEntity<ErrorResponseDto> buildValidationResponse(BindingResult bindingResult,
+                                                                     HttpServletRequest request) {
+        Map<String, String> fieldErrors = bindingResult.getFieldErrors().stream()
+                .collect(Collectors.toMap(
+                        error -> error.getField(),
+                        this::resolveFieldError,
+                        (first, second) -> first,
+                        LinkedHashMap::new));
+        return buildResponse(HttpStatus.BAD_REQUEST, resolve("error.validation"), fieldErrors, request);
+    }
+
     private String resolve(String code, Object... args) {
         return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
     }
@@ -109,5 +122,21 @@ public class RestExceptionHandler {
             return resolve(message.substring(1, message.length() - 1));
         }
         return message;
+    }
+
+    private String resolveFieldError(FieldError error) {
+        String defaultMessage = error.getDefaultMessage();
+
+        if (defaultMessage != null) {
+            return resolveError(defaultMessage);
+        }
+
+        String code = error.getCode();
+
+        if (code != null) {
+            return resolveError(code);
+        }
+
+        return resolve("error.validation.field");
     }
 }
