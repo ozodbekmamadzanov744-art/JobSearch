@@ -17,6 +17,7 @@ import kg.attractor.jobsearch.security.CustomUserDetails;
 import kg.attractor.jobsearch.service.CategoryService;
 import kg.attractor.jobsearch.service.ContactTypeService;
 import kg.attractor.jobsearch.service.ResumeService;
+import kg.attractor.jobsearch.service.VacancyService;
 import kg.attractor.jobsearch.util.ResumeValidationUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -43,22 +44,31 @@ public class ResumePageController {
     private final ResumeService resumeService;
     private final CategoryService categoryService;
     private final ContactTypeService contactTypeService;
+    private final VacancyService vacancyService;
 
     public ResumePageController(ResumeService resumeService,
                                 CategoryService categoryService,
-                                ContactTypeService contactTypeService) {
+                                ContactTypeService contactTypeService,
+                                VacancyService vacancyService) {
         this.resumeService = resumeService;
         this.categoryService = categoryService;
         this.contactTypeService = contactTypeService;
+        this.vacancyService = vacancyService;
     }
 
     private static final int DEFAULT_PAGE_SIZE = 5;
 
     @GetMapping
-    public String resumes(Model model, @RequestParam(defaultValue = "0") int page) {
-        Page<Resume> resumePage = resumeService.getAllActiveResumes(page, DEFAULT_PAGE_SIZE);
+    public String resumes(Model model,
+                          @RequestParam(defaultValue = "0") int page,
+                          @RequestParam(required = false) Long categoryId) {
+        Page<Resume> resumePage = categoryId == null
+                ? resumeService.getAllActiveResumes(page, DEFAULT_PAGE_SIZE)
+                : resumeService.getActiveResumesByCategory(categoryId, page, DEFAULT_PAGE_SIZE);
         model.addAttribute("resumePage", resumePage);
         model.addAttribute("resumes", resumePage.getContent());
+        model.addAttribute("currentCategoryId", categoryId);
+        addReferenceData(model);
         return "resumes/list";
     }
 
@@ -154,13 +164,24 @@ public class ResumePageController {
     }
 
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Model model) {
+    public String detail(@PathVariable Long id,
+                         Model model,
+                         @AuthenticationPrincipal CustomUserDetails userDetails) {
         Resume resume = resumeService.getResumeById(id);
 
         model.addAttribute("resume", resume);
         model.addAttribute("educationList", resumeService.getEducationByResumeId(id));
         model.addAttribute("workExperienceList", resumeService.getWorkExperienceByResumeId(id));
         model.addAttribute("contactList", resumeService.getContactsByResumeId(id));
+        if (userDetails != null && "EMPLOYER".equals(userDetails.getUser().getAccountType())) {
+            model.addAttribute(
+                    "activeEmployerVacancies",
+                    vacancyService.getVacanciesByAuthor(userDetails.getUser().getId())
+                            .stream()
+                            .filter(vacancy -> Boolean.TRUE.equals(vacancy.getIsActive()))
+                            .toList()
+            );
+        }
 
         return "resumes/detail";
     }
@@ -191,6 +212,13 @@ public class ResumePageController {
                 userDetails.getUser().getId()
         );
 
+        return "redirect:/pages/cabinet";
+    }
+
+    @PostMapping("/{id}/refresh")
+    public String refresh(@PathVariable Long id,
+                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        resumeService.refreshResume(id, userDetails.getUser().getId());
         return "redirect:/pages/cabinet";
     }
 

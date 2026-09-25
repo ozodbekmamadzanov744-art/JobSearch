@@ -6,6 +6,8 @@ import kg.attractor.jobsearch.model.RespondedApplicant;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.Vacancy;
+import kg.attractor.jobsearch.repository.MessageRepository;
+import kg.attractor.jobsearch.repository.RespondedApplicantRepository;
 import kg.attractor.jobsearch.repository.VacancyRepository;
 import kg.attractor.jobsearch.service.RespondedApplicantService;
 import kg.attractor.jobsearch.service.ResumeService;
@@ -18,7 +20,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -32,8 +36,12 @@ public class VacancyServiceImpl implements VacancyService {
     private static final String SORT_BY_DATE = "date";
     private static final String SORT_BY_DATE_ASC = "date_asc";
     private static final String SORT_BY_DATE_DESC = "date_desc";
+    private static final String SORT_BY_SALARY_ASC = "salary_asc";
+    private static final String SORT_BY_SALARY_DESC = "salary_desc";
 
     private final VacancyRepository vacancyRepository;
+    private final RespondedApplicantRepository respondedApplicantRepository;
+    private final MessageRepository messageRepository;
     private final RespondedApplicantService respondedApplicantService;
     private final ResumeService resumeService;
     private final UserService userService;
@@ -68,6 +76,7 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
+    @Transactional
     public void deleteVacancy(Long id, Long currentUserId) {
         Vacancy existing = getVacancyById(id);
 
@@ -75,7 +84,23 @@ public class VacancyServiceImpl implements VacancyService {
             throw new ForbiddenOperationException("error.vacancy.owner");
         }
 
+        respondedApplicantRepository.findByVacancyId(id).forEach(response -> {
+            messageRepository.deleteByRespondedApplicantId(response.getId());
+            respondedApplicantRepository.delete(response);
+        });
         vacancyRepository.deleteById(id);
+    }
+
+    @Override
+    public Vacancy refreshVacancy(Long id, Long currentUserId) {
+        Vacancy existing = getVacancyById(id);
+
+        if (existing.getAuthor() == null || !existing.getAuthor().getId().equals(currentUserId)) {
+            throw new ForbiddenOperationException("error.vacancy.owner");
+        }
+
+        existing.setUpdateTime(LocalDateTime.now());
+        return vacancyRepository.save(existing);
     }
 
     @Override
@@ -106,8 +131,23 @@ public class VacancyServiceImpl implements VacancyService {
         Long resumeId = response.getResume() != null ? response.getResume().getId() : null;
         log.info("Соискатель откликается резюме id={} на вакансию id={}", resumeId, vacancyId);
         Vacancy vacancy = getVacancyById(vacancyId);
+        if (!Boolean.TRUE.equals(vacancy.getIsActive())) {
+            throw new ForbiddenOperationException("error.vacancy.inactive");
+        }
         response.setVacancy(vacancy);
-        return respondedApplicantService.createResponse(response);
+        return respondedApplicantService.findOrCreateResponse(response);
+    }
+
+    @Override
+    public RespondedApplicant respondToVacancy(Long vacancyId, RespondedApplicant response, Long currentUserId) {
+        Long resumeId = response.getResume() != null ? response.getResume().getId() : null;
+        Resume resume = resumeService.getResumeById(resumeId);
+
+        if (resume.getApplicant() == null || !resume.getApplicant().getId().equals(currentUserId)) {
+            throw new ForbiddenOperationException("validation.vacancy.respondAsOther");
+        }
+
+        return respondToVacancy(vacancyId, response);
     }
 
     @Override
@@ -141,8 +181,8 @@ public class VacancyServiceImpl implements VacancyService {
         if (SORT_BY_RESPONSES_ASC.equals(sortBy)) {
             return vacancyRepository.findActiveOrderByResponseCountAsc(PageRequest.of(page, size));
         }
-        Sort.Direction direction = SORT_BY_DATE_ASC.equals(sortBy) ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "createdDate"));
+        Sort sort = buildSimpleSort(sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         return vacancyRepository.findByIsActiveTrue(pageable);
     }
 
@@ -154,8 +194,8 @@ public class VacancyServiceImpl implements VacancyService {
         if (SORT_BY_RESPONSES_ASC.equals(sortBy)) {
             return vacancyRepository.findByAuthorIdOrderByResponseCountAsc(authorId, PageRequest.of(page, size));
         }
-        Sort.Direction direction = SORT_BY_DATE_ASC.equals(sortBy) ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "createdDate"));
+        Sort sort = buildSimpleSort(sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         return vacancyRepository.findByAuthorId(authorId, pageable);
     }
 
@@ -174,14 +214,25 @@ public class VacancyServiceImpl implements VacancyService {
                     .getContent();
         }
 
+        return vacancyRepository
+                .findByIsActiveTrue(
+                        Pageable.unpaged(buildSimpleSort(sortBy))
+                )
+                .getContent();
+    }
+
+    private Sort buildSimpleSort(String sortBy) {
+        if (SORT_BY_SALARY_ASC.equals(sortBy)) {
+            return Sort.by(Sort.Direction.ASC, "salary");
+        }
+        if (SORT_BY_SALARY_DESC.equals(sortBy)) {
+            return Sort.by(Sort.Direction.DESC, "salary");
+        }
+
         Sort.Direction direction = SORT_BY_DATE_ASC.equals(sortBy)
                 ? Sort.Direction.ASC
                 : Sort.Direction.DESC;
 
-        return vacancyRepository
-                .findByIsActiveTrue(
-                        Pageable.unpaged(Sort.by(direction, "createdDate"))
-                )
-                .getContent();
+        return Sort.by(direction, "updateTime");
     }
 }

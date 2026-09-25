@@ -37,7 +37,13 @@ public class CompanyPageController {
     public String companyDetails(@PathVariable Long id, Model model) {
         User company = userService.getUserById(id);
         model.addAttribute("company", company);
-        model.addAttribute("vacancies", vacancyService.getVacanciesByAuthor(id));
+        model.addAttribute(
+                "vacancies",
+                vacancyService.getVacanciesByAuthor(id)
+                        .stream()
+                        .filter(vacancy -> Boolean.TRUE.equals(vacancy.getIsActive()))
+                        .toList()
+        );
         return "companies/detail";
     }
 }

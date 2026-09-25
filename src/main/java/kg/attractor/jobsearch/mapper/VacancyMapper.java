@@ -47,6 +47,7 @@ public class VacancyMapper {
         dto.setExpTo(vacancy.getExpTo());
         dto.setIsActive(vacancy.getIsActive());
         dto.setAuthorId(vacancy.getAuthor() != null ? vacancy.getAuthor().getId() : null);
+        dto.setAuthorName(vacancy.getAuthor() != null ? vacancy.getAuthor().getName() : null);
         dto.setCreatedDate(vacancy.getCreatedDate());
         dto.setUpdateTime(vacancy.getUpdateTime());
         return dto;

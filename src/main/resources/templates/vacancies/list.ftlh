@@ -20,9 +20,9 @@
 
     <form id="vacancy-filter-form" class="card card-body mb-4">
         <div class="row g-3">
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <label for="filter-name" class="form-label">
-                    <#if english>Vacancy name<#else>Название вакансии</#if>
+                    <@spring.message "vacancies.filter.name"/>
                 </label>
 
                 <input type="text"
@@ -31,9 +31,9 @@
                        class="form-control">
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="filter-salary" class="form-label">
-                    <#if english>Minimum salary<#else>Зарплата от</#if>
+                    <@spring.message "vacancies.filter.salary"/>
                 </label>
 
                 <input type="number"
@@ -44,7 +44,20 @@
                        step="any">
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label for="filter-category" class="form-label">
+                    <@spring.message "vacancies.filter.category"/>
+                </label>
+
+                <select id="filter-category" name="categoryId" class="form-select">
+                    <option value=""><@spring.message "vacancies.filter.allCategories"/></option>
+                    <#list categories?keys as key>
+                        <option value="${key}">${categories[key]}</option>
+                    </#list>
+                </select>
+            </div>
+
+            <div class="col-md-3">
                 <label for="filter-sort" class="form-label">
                     <@spring.message "vacancies.sort.label"/>
                 </label>
@@ -65,6 +78,14 @@
                     <option value="responses_asc">
                         <@spring.message "vacancies.sort.responsesAsc"/>
                     </option>
+
+                    <option value="salary_desc">
+                        <@spring.message "vacancies.sort.salaryDesc"/>
+                    </option>
+
+                    <option value="salary_asc">
+                        <@spring.message "vacancies.sort.salaryAsc"/>
+                    </option>
                 </select>
             </div>
         </div>
@@ -73,47 +94,37 @@
             <button type="submit"
                     id="search-button"
                     class="btn btn-primary">
-                <#if english>Search<#else>Найти</#if>
+                <@spring.message "vacancies.filter.search"/>
             </button>
 
             <button type="button"
                     id="reset-filter"
                     class="btn btn-outline-secondary">
-                <#if english>Reset<#else>Сбросить</#if>
+                <@spring.message "vacancies.filter.reset"/>
             </button>
         </div>
     </form>
 
     <p id="loading-message" class="text-muted" hidden>
-        <#if english>Loading vacancies...<#else>Загрузка вакансий...</#if>
+        <@spring.message "vacancies.filter.loading"/>
     </p>
 
     <p id="error-message" class="text-danger" hidden>
-        <#if english>
-            Could not load vacancies. Click Search to try again.
-        <#else>
-            Не удалось загрузить вакансии. Нажмите «Найти», чтобы повторить.
-        </#if>
+        <@spring.message "vacancies.filter.error"/>
     </p>
 
     <p id="storage-message" class="text-warning" hidden>
-        <#if english>
-            Could not save the filter in this browser.
-        <#else>
-            Не удалось сохранить фильтр в этом браузере.
-        </#if>
+        <@spring.message "vacancies.filter.storageError"/>
     </p>
 
     <p id="empty-message" class="text-muted" hidden>
-        <#if english>
-            No vacancies match your search.
-        <#else>
-            По вашему запросу вакансии не найдены.
-        </#if>
+        <@spring.message "vacancies.filter.empty"/>
     </p>
 
     <div id="vacancy-list"
-         data-experience-label="<#if english>Experience<#else>Опыт работы</#if>">
+         data-experience-label="<@spring.message 'vacancies.filter.experience'/>"
+         data-company-label="<@spring.message 'vacancies.filter.company'/>"
+         data-updated-label="<@spring.message 'vacancies.filter.updated'/>">
     </div>
 
     <div id="vacancy-pagination" class="text-center mt-4" hidden>

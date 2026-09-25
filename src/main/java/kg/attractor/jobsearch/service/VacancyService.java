@@ -15,6 +15,8 @@ public interface VacancyService {
 
     void deleteVacancy(Long id, Long currentUserId);
 
+    Vacancy refreshVacancy(Long id, Long currentUserId);
+
     Vacancy getVacancyById(Long id);
 
     List<Vacancy> getAllActiveVacancies();
@@ -26,6 +28,8 @@ public interface VacancyService {
     List<Vacancy> getVacanciesByAuthor(Long authorId);
 
     RespondedApplicant respondToVacancy(Long vacancyId, RespondedApplicant response);
+
+    RespondedApplicant respondToVacancy(Long vacancyId, RespondedApplicant response, Long currentUserId);
 
     List<User> getApplicantsForVacancy(Long vacancyId);
 

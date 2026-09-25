@@ -61,6 +61,7 @@ public class VacancyPageController {
         model.addAttribute("vacancyPage", vacancyPage);
         model.addAttribute("vacancies", vacancyPage.getContent());
         model.addAttribute("currentSort", sort);
+        addReferenceData(model);
 
         if (userDetails != null) {
             var user = userService.getUserById(userDetails.getUser().getId());
@@ -202,6 +203,13 @@ public class VacancyPageController {
         return "redirect:/pages/cabinet";
     }
 
+    @PostMapping("/{id}/refresh")
+    public String refresh(@PathVariable Long id,
+                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        vacancyService.refreshVacancy(id, userDetails.getUser().getId());
+        return "redirect:/pages/cabinet";
+    }
+
     @PostMapping("/{id}/respond")
     public String respond(@PathVariable Long id,
                           @RequestParam Long resumeId,
@@ -220,10 +228,15 @@ public class VacancyPageController {
         Resume resumeReference = new Resume();
         resumeReference.setId(resumeId);
         response.setResume(resumeReference);
+        response.setConfirmation(false);
 
-        vacancyService.respondToVacancy(id, response);
+        RespondedApplicant saved = vacancyService.respondToVacancy(
+                id,
+                response,
+                userDetails.getUser().getId()
+        );
 
-        return "redirect:/pages/vacancies";
+        return "redirect:/pages/chats/" + saved.getId();
     }
 
     @GetMapping("/{id}/respond")
@@ -279,9 +292,9 @@ public class VacancyPageController {
             );
         }
 
-        List<Resume> resumes = respondedApplicantService
-                .findByVacancyId(id)
-                .stream()
+        List<RespondedApplicant> responses = respondedApplicantService.findByVacancyId(id);
+
+        List<Resume> resumes = responses.stream()
                 .map(RespondedApplicant::getResume)
                 .filter(java.util.Objects::nonNull)
                 .map(Resume::getId)
@@ -289,6 +302,7 @@ public class VacancyPageController {
                 .toList();
 
         model.addAttribute("resumes", resumes);
+        model.addAttribute("responses", responses);
         model.addAttribute("vacancyName", vacancy.getName());
 
         return "resumes/list";

@@ -24,6 +24,10 @@ public class Message {
     @JoinColumn(name = "responded_applicants_id")
     private RespondedApplicant respondedApplicant;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id")
+    private User sender;
+
     @Lob
     private String content;
 

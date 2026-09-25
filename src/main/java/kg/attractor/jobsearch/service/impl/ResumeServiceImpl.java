@@ -6,6 +6,7 @@ import kg.attractor.jobsearch.model.ContactInfo;
 import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
+import kg.attractor.jobsearch.repository.MessageRepository;
 import kg.attractor.jobsearch.repository.ResumeRepository;
 import kg.attractor.jobsearch.repository.RespondedApplicantRepository;
 import kg.attractor.jobsearch.service.ContactInfoService;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -33,6 +35,7 @@ public class ResumeServiceImpl implements ResumeService {
     private final WorkExperienceInfoService workExperienceInfoService;
     private final ContactInfoService contactInfoService;
     private final RespondedApplicantRepository respondedApplicantRepository;
+    private final MessageRepository messageRepository;
 
     @Override
     @Transactional
@@ -94,8 +97,23 @@ public class ResumeServiceImpl implements ResumeService {
         educationInfoService.deleteByResumeId(id);
         workExperienceInfoService.deleteByResumeId(id);
         contactInfoService.deleteByResumeId(id);
-        respondedApplicantRepository.findByResumeId(id).forEach(respondedApplicantRepository::delete);
+        respondedApplicantRepository.findByResumeId(id).forEach(response -> {
+            messageRepository.deleteByRespondedApplicantId(response.getId());
+            respondedApplicantRepository.delete(response);
+        });
         resumeRepository.deleteById(id);
+    }
+
+    @Override
+    public Resume refreshResume(Long id, Long currentUserId) {
+        Resume existing = getResumeById(id);
+
+        if (existing.getApplicant() == null || !existing.getApplicant().getId().equals(currentUserId)) {
+            throw new ForbiddenOperationException("error.resume.owner");
+        }
+
+        existing.setUpdateTime(LocalDateTime.now());
+        return resumeRepository.save(existing);
     }
 
     @Override
@@ -141,6 +159,12 @@ public class ResumeServiceImpl implements ResumeService {
     public Page<Resume> getAllActiveResumes(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updateTime"));
         return resumeRepository.findByIsActiveTrue(pageable);
+    }
+
+    @Override
+    public Page<Resume> getActiveResumesByCategory(Long categoryId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updateTime"));
+        return resumeRepository.findByIsActiveTrueAndCategoryId(categoryId, pageable);
     }
 
     @Override
