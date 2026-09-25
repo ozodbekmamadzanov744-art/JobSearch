@@ -41,6 +41,34 @@
         </#if>
     </div>
 
+    <#if activeEmployerVacancies??>
+        <div class="detail-band mb-4">
+            <h2 class="h4 mb-3"><@spring.message "chat.start.title"/></h2>
+            <#if activeEmployerVacancies?size == 0>
+                <p class="text-muted mb-0"><@spring.message "chat.start.noVacancies"/></p>
+            <#else>
+                <form action="/pages/chats/start" method="post" class="d-flex gap-2 align-items-center flex-wrap">
+                    <#if _csrf??>
+                        <input type="hidden"
+                               name="${(_csrf.parameterName)!'csrf'}"
+                               value="${(_csrf.token)!'--no-token--'}"/>
+                    </#if>
+                    <input type="hidden" name="resumeId" value="${resume.id}">
+
+                    <select name="vacancyId" class="form-select" style="max-width: 360px;">
+                        <#list activeEmployerVacancies as vacancy>
+                            <option value="${vacancy.id}">${vacancy.name}</option>
+                        </#list>
+                    </select>
+
+                    <button type="submit" class="btn btn-primary">
+                        <@spring.message "chat.start.submit"/>
+                    </button>
+                </form>
+            </#if>
+        </div>
+    </#if>
+
     <div class="mb-4">
         <h2 class="h4 mb-3">
             <@spring.message "resume.contacts"/>

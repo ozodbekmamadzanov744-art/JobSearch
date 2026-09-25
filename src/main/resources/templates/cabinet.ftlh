@@ -12,13 +12,21 @@
                 <p class="text-muted mb-0"><@spring.message "common.employer"/></p>
             </#if>
         </div>
-        <a href="/pages/profile/edit" class="btn btn-outline-secondary"><@spring.message "common.edit"/></a>
+        <button type="button"
+                class="btn btn-outline-secondary"
+                data-bs-toggle="modal"
+                data-bs-target="#profileModal">
+            <@spring.message "common.edit"/>
+        </button>
     </div>
 
     <#if user.accountType == "APPLICANT">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
             <h2 class="h4 mb-0"><@spring.message "resumes.title"/></h2>
-            <a href="/pages/resumes/create" class="btn btn-primary btn-sm"><@spring.message "common.create"/></a>
+            <div class="d-flex gap-2">
+                <a href="/pages/responses" class="btn btn-outline-secondary btn-sm"><@spring.message "responses.title"/></a>
+                <a href="/pages/resumes/create" class="btn btn-primary btn-sm"><@spring.message "common.create"/></a>
+            </div>
         </div>
         <#if resumes?size == 0>
             <p class="text-muted"><@spring.message "resumes.empty"/></p>
@@ -37,6 +45,12 @@
                         </p>
                     </div>
                     <div class="d-flex gap-2">
+                        <form action="/pages/resumes/${resume.id}/refresh" method="post">
+                            <#if _csrf??>
+                                <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
+                            </#if>
+                            <button type="submit" class="btn btn-outline-secondary btn-sm"><@spring.message "common.update"/></button>
+                        </form>
                         <a href="/pages/resumes/${resume.id}/edit" class="btn btn-outline-primary btn-sm"><@spring.message "common.edit"/></a>
                         <button class="btn btn-outline-danger btn-sm" onclick="deleteResume(${resume.id})"><@spring.message "common.delete"/></button>
                     </div>
@@ -79,6 +93,12 @@
                         </p>
                     </div>
                     <div class="d-flex gap-2">
+                        <form action="/pages/vacancies/${vacancy.id}/refresh" method="post">
+                            <#if _csrf??>
+                                <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
+                            </#if>
+                            <button type="submit" class="btn btn-outline-secondary btn-sm"><@spring.message "common.update"/></button>
+                        </form>
                         <a href="/pages/vacancies/${vacancy.id}/edit" class="btn btn-outline-primary btn-sm"><@spring.message "common.edit"/></a>
                         <a href="/pages/vacancies/${vacancy.id}/applicants" class="btn btn-outline-secondary btn-sm"><@spring.message "vacancy.responses"/></a>
                         <button class="btn btn-outline-danger btn-sm" onclick="deleteVacancy(${vacancy.id})"><@spring.message "common.delete"/></button>
@@ -91,7 +111,71 @@
         </#if>
     </#if>
 
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="profileModalTitle"><@spring.message "profile.editTitle"/></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<@spring.message 'common.close'/>"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="profile-avatar-block mb-4">
+                        <img src="${user.avatar!'/images/default-avatar.png'}" class="rounded-circle profile-avatar" alt="<@spring.message 'company.avatarAlt'/>">
+                        <form action="/pages/profile/avatar" method="post" enctype="multipart/form-data" class="mt-3">
+                            <#if _csrf??>
+                                <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
+                            </#if>
+                            <input type="file" name="avatar" accept="image/*" class="form-control mb-2">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm"><@spring.message 'profile.editAvatar'/></button>
+                        </form>
+                    </div>
+
+                    <form action="/pages/profile/edit" method="post">
+                        <#if _csrf??>
+                            <input type="hidden" name="${(_csrf.parameterName)!'csrf'}" value="${(_csrf.token)!'--no-token--'}"/>
+                        </#if>
+
+                        <div class="mb-3">
+                            <label class="form-label"><@spring.message 'profile.name'/></label>
+                            <@spring.formInput "profileDto.name" 'class="form-control"'/>
+                            <@spring.showErrors "<br>" "text-danger small"/>
+                        </div>
+
+                        <#if user.accountType == "APPLICANT">
+                            <div class="mb-3">
+                                <label class="form-label"><@spring.message 'profile.surname'/></label>
+                                <@spring.formInput "profileDto.surname" 'class="form-control"'/>
+                                <@spring.showErrors "<br>" "text-danger small"/>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label"><@spring.message 'profile.age'/></label>
+                                <@spring.formInput "profileDto.age" 'class="form-control"'/>
+                                <@spring.showErrors "<br>" "text-danger small"/>
+                            </div>
+                        </#if>
+
+                        <div class="mb-3">
+                            <label class="form-label"><@spring.message 'profile.phone'/></label>
+                            <@spring.formInput "profileDto.phoneNumber" 'class="form-control"'/>
+                            <@spring.showErrors "<br>" "text-danger small"/>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary"><@spring.message 'profile.submit'/></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        <#if showProfileModal?? && showProfileModal>
+            document.addEventListener('DOMContentLoaded', function () {
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('profileModal')).show();
+            });
+        </#if>
+
         async function deleteResume(id) {
             if (!confirm('<@spring.message "common.deleteResumeConfirm"/>')) return;
             const res = await fetch('/resumes/' + id, {
