@@ -10,4 +10,8 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
     List<Message> findByRespondedApplicantId(Long respondedApplicantId);
+
+    List<Message> findByRespondedApplicantIdOrderByTimestampAsc(Long respondedApplicantId);
+
+    void deleteByRespondedApplicantId(Long respondedApplicantId);
 }

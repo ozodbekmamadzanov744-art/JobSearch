@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
+import kg.attractor.jobsearch.dto.UserProfileUpdateDto;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.Vacancy;
 import kg.attractor.jobsearch.security.CustomUserDetails;
@@ -37,6 +38,14 @@ public class CabinetController {
                           @AuthenticationPrincipal CustomUserDetails userDetails) {
         var user = userService.getUserById(userDetails.getUser().getId());
         model.addAttribute("user", user);
+        if (!model.containsAttribute("profileDto")) {
+            UserProfileUpdateDto dto = new UserProfileUpdateDto();
+            dto.setName(user.getName());
+            dto.setSurname(user.getSurname());
+            dto.setAge(user.getAge());
+            dto.setPhoneNumber(user.getPhoneNumber());
+            model.addAttribute("profileDto", dto);
+        }
 
         if ("APPLICANT".equals(user.getAccountType())) {
             Page<Resume> resumePage = resumeService.getResumesByApplicant(user.getId(), page, DEFAULT_PAGE_SIZE);

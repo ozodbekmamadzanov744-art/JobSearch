@@ -20,6 +20,7 @@ public class VacancyResponseDto {
     private Integer expTo;
     private Boolean isActive;
     private Long authorId;
+    private String authorName;
     private LocalDateTime createdDate;
     private LocalDateTime updateTime;
 }

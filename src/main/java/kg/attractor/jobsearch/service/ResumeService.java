@@ -18,6 +18,8 @@ public interface ResumeService {
 
     void deleteResume(Long id, Long currentUserId);
 
+    Resume refreshResume(Long id, Long currentUserId);
+
     Resume getResumeById(Long id);
 
     List<Resume> getAllActiveResumes();
@@ -33,6 +35,8 @@ public interface ResumeService {
     List<ContactInfo> getContactsByResumeId(Long resumeId);
 
     Page<Resume> getAllActiveResumes(int page, int size);
+
+    Page<Resume> getActiveResumesByCategory(Long categoryId, int page, int size);
 
     Page<Resume> getResumesByApplicant(Long applicantId, int page, int size);
 }

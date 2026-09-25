@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/pages/profile")
@@ -47,7 +48,8 @@ public class ProfilePageController {
     public String edit(@Valid @ModelAttribute("profileDto") UserProfileUpdateDto dto,
                        BindingResult bindingResult,
                        @AuthenticationPrincipal CustomUserDetails userDetails,
-                       Model model) {
+                       Model model,
+                       RedirectAttributes redirectAttributes) {
         User currentUser = userDetails.getUser();
         if ("APPLICANT".equals(currentUser.getAccountType())) {
             if (dto.getSurname() == null || dto.getSurname().isBlank()) {
@@ -59,9 +61,13 @@ public class ProfilePageController {
         }
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("accountType", currentUser.getAccountType());
-            model.addAttribute("user", currentUser);
-            return "profile/edit";
+            redirectAttributes.addFlashAttribute("profileDto", dto);
+            redirectAttributes.addFlashAttribute(
+                    BindingResult.MODEL_KEY_PREFIX + "profileDto",
+                    bindingResult
+            );
+            redirectAttributes.addFlashAttribute("showProfileModal", true);
+            return "redirect:/pages/cabinet";
         }
 
         Long userId = currentUser.getId();
@@ -76,6 +82,6 @@ public class ProfilePageController {
                                @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUser().getId();
         userService.uploadAvatar(userId, file, userId);
-        return "redirect:/pages/profile/edit";
+        return "redirect:/pages/cabinet";
     }
 }
