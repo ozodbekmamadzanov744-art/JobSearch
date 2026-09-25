@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const filterForm = document.getElementById('vacancy-filter-form');
     const nameInput = document.getElementById('filter-name');
     const salaryInput = document.getElementById('filter-salary');
+    const categorySelect = document.getElementById('filter-category');
     const sortSelect = document.getElementById('filter-sort');
 
     const searchButton = document.getElementById('search-button');
@@ -23,6 +24,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let filteredVacancies = [];
     let currentPage = 0;
+    let latestRequestId = 0;
+    let searchTimer = null;
 
     restoreFilter();
     loadVacancies();
@@ -30,6 +33,27 @@ document.addEventListener('DOMContentLoaded', function () {
     filterForm.addEventListener('submit', function (event) {
         event.preventDefault();
 
+        saveFilter();
+        loadVacancies();
+    });
+
+    nameInput.addEventListener('input', function () {
+        window.clearTimeout(searchTimer);
+        searchTimer = window.setTimeout(function () {
+            saveFilter();
+            loadVacancies();
+        }, 250);
+    });
+
+    salaryInput.addEventListener('input', function () {
+        window.clearTimeout(searchTimer);
+        searchTimer = window.setTimeout(function () {
+            saveFilter();
+            loadVacancies();
+        }, 250);
+    });
+
+    categorySelect.addEventListener('change', function () {
         saveFilter();
         loadVacancies();
     });
@@ -119,11 +143,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 'date_desc',
                 'date_asc',
                 'responses_desc',
-                'responses_asc'
+                'responses_asc',
+                'salary_desc',
+                'salary_asc'
             ];
 
             if (allowedSorts.includes(filter.sort)) {
                 sortSelect.value = filter.sort;
+            }
+
+            if (typeof filter.categoryId === 'string') {
+                categorySelect.value = filter.categoryId;
             }
         } catch (error) {
             storageMessage.hidden = false;
@@ -132,6 +162,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function loadVacancies() {
         const filter = getFilter();
+        const requestId = ++latestRequestId;
 
         setLoading(true);
 
@@ -148,6 +179,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const vacancies = await response.json();
+
+            if (requestId !== latestRequestId) {
+                return;
+            }
+
             const searchName = filter.name.toLowerCase();
 
             filteredVacancies = vacancies.filter(function (vacancy) {
@@ -159,19 +195,28 @@ document.addEventListener('DOMContentLoaded', function () {
                     || (vacancy.salary != null
                         && vacancy.salary >= Number(filter.salary));
 
-                return matchesName && matchesSalary;
+                const matchesCategory = filter.categoryId === ''
+                    || String(vacancy.categoryId) === filter.categoryId;
+
+                return matchesName && matchesSalary && matchesCategory;
             });
 
             currentPage = 0;
             renderVacancies();
         } catch (error) {
+            if (requestId !== latestRequestId) {
+                return;
+            }
+
             filteredVacancies = [];
             vacancyList.innerHTML = '';
             pagination.hidden = true;
             emptyMessage.hidden = true;
             errorMessage.hidden = false;
         } finally {
-            setLoading(false);
+            if (requestId === latestRequestId) {
+                setLoading(false);
+            }
         }
     }
 
@@ -180,9 +225,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         searchButton.disabled = loading;
         resetButton.disabled = loading;
-        nameInput.disabled = loading;
-        salaryInput.disabled = loading;
-        sortSelect.disabled = loading;
     }
 
     function renderVacancies() {
@@ -194,12 +236,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const pageVacancies = filteredVacancies.slice(start, start + pageSize);
 
         pageVacancies.forEach(function (vacancy) {
-            const link = createElement(
-                'a',
-                'text-decoration-none text-reset'
-            );
-            link.href = '/pages/vacancies/' + vacancy.id;
-
             const card = createElement('div', 'card shadow-sm mb-3');
             const body = createElement('div', 'card-body');
 
@@ -211,10 +247,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const information = createElement('div', '');
 
             const title = createElement(
-                'h2',
-                'h5 mb-1',
+                'a',
+                'h5 mb-1 d-inline-block text-decoration-none text-body',
                 vacancy.name
             );
+            title.href = '/pages/vacancies/' + vacancy.id;
 
             const expFrom = vacancy.expFrom == null ? '—' : vacancy.expFrom;
             const expTo = vacancy.expTo == null ? '—' : vacancy.expTo;
@@ -225,11 +262,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 vacancyList.dataset.experienceLabel + ': ' + expFrom + '–' + expTo
             );
 
+            const updatedText = vacancy.updateTime
+                ? vacancy.updateTime.substring(0, 10)
+                : '—';
+
+            const updated = createElement(
+                'p',
+                'text-muted mb-0',
+                vacancyList.dataset.updatedLabel + ': ' + updatedText
+            );
+
             const salary = createElement(
                 'div',
                 'fw-semibold text-nowrap',
                 vacancy.salary == null ? '—' : vacancy.salary
             );
+
+            const company = createElement(
+                'a',
+                'link-secondary small'
+            );
+            company.href = vacancy.authorId == null ? '#' : '/pages/companies/' + vacancy.authorId;
+            company.textContent = vacancyList.dataset.companyLabel + ': ' + (vacancy.authorName || '—');
+            company.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
 
             const description = createElement(
                 'p',
@@ -239,6 +296,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             information.appendChild(title);
             information.appendChild(experience);
+            information.appendChild(updated);
+            information.appendChild(company);
 
             heading.appendChild(information);
             heading.appendChild(salary);
@@ -247,8 +306,7 @@ document.addEventListener('DOMContentLoaded', function () {
             body.appendChild(description);
 
             card.appendChild(body);
-            link.appendChild(card);
-            vacancyList.appendChild(link);
+            vacancyList.appendChild(card);
         });
 
         const totalPages = Math.ceil(filteredVacancies.length / pageSize);

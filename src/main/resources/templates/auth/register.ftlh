@@ -40,23 +40,24 @@
                             </label>
 
                             <div class="btn-group w-100" role="group">
-                                <input class="btn-check"
+                               <input class="btn-check"
                                        type="radio"
                                        name="accountType"
                                        id="roleApplicant"
                                        value="APPLICANT"
-                                       checked>
+                                       <#if !registrationDto.accountType?? || registrationDto.accountType == "APPLICANT">checked</#if>>
 
                                 <label class="btn btn-outline-primary"
                                        for="roleApplicant">
                                     <@spring.message "register.applicant"/>
                                 </label>
 
-                                <input class="btn-check"
+                               <input class="btn-check"
                                        type="radio"
                                        name="accountType"
                                        id="roleEmployer"
-                                       value="EMPLOYER">
+                                       value="EMPLOYER"
+                                       <#if registrationDto.accountType?? && registrationDto.accountType == "EMPLOYER">checked</#if>>
 
                                 <label class="btn btn-outline-primary"
                                        for="roleEmployer">
@@ -66,7 +67,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">
+                            <label class="form-label" id="register-name-label">
                                 <@spring.message "register.name"/>
                             </label>
 
@@ -142,4 +143,22 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const nameLabel = document.getElementById('register-name-label');
+            const applicant = document.getElementById('roleApplicant');
+            const employer = document.getElementById('roleEmployer');
+            const applicantLabel = '<@spring.message "register.nameApplicant"/>';
+            const employerLabel = '<@spring.message "register.nameEmployer"/>';
+
+            function updateNameLabel() {
+                nameLabel.textContent = employer.checked ? employerLabel : applicantLabel;
+            }
+
+            applicant.addEventListener('change', updateNameLabel);
+            employer.addEventListener('change', updateNameLabel);
+            updateNameLabel();
+        });
+    </script>
 </@layout.layout>
